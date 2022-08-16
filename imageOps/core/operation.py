@@ -3,15 +3,31 @@ from abc import ABC, abstractmethod
 from ast import Pass
 import numbers
 from typing import Any, List, Tuple
+
+from .cuda.stream import CudaStream
+
+from .datacontainer import DataContainer
+from .cuda.context import CudaContext
 from imageOps.utils.cuda import *
 import numpy as np
 import math
 
 class Operation(ABC):
 
-    def __init__(self) -> None:
+    _defaultStream = None
+
+    def __init__(self,stream: CudaStream = None) -> None:
         super().__init__()
-        self.kernelArgumentBuffers = []
+        self.dataContainers : List[DataContainer] = []
+        self.module = None
+        self.stream = stream.stream
+
+        if self.stream is None:
+
+            if Operation._defaultStream is None:
+                Operation._defaultStream = CudaStream()
+            
+            self.stream = Operation._defaultStream
 
 
     def __compile_kernel(self,debug=True) -> Any:
@@ -19,7 +35,6 @@ class Operation(ABC):
         kernel_name_b = str.encode(self.__get_kernel_name())
 
         # Create program
-        #err, prog = nvrtc.nvrtcCreateProgram(str.encode(self.__get_kernel()), kernel_name_b, 1, [b"D:\Projects\Pessoal\imageOps\imageOps"], [b"utils.cu"])
         err, prog = nvrtc.nvrtcCreateProgram(str.encode(self.__get_kernel()), kernel_name_b, 0, [], [])
 
         check_error(err)
@@ -53,50 +68,32 @@ class Operation(ABC):
         # Load PTX as module data and retrieve function
         ptx = np.char.array(ptx)
         # Note: Incompatible --gpu-architecture would be detected here
-        err, module = cuda.cuModuleLoadData(ptx.ctypes.data)
+        err, self.module = cuda.cuModuleLoadData(ptx.ctypes.data)
         check_error(err)
-        err, kernel = cuda.cuModuleGetFunction(module, kernel_name_b)
+        err, kernel = cuda.cuModuleGetFunction(self.module, kernel_name_b)
         check_error(err)
 
         return kernel
-
-    def __init_context(self):
-        
-        # Initialize CUDA Driver API
-        err, = cuda.cuInit(0)
-        check_error(err)
-
-        # Retrieve handle for device 0
-        err, cuDevice = cuda.cuDeviceGet(0)
-        check_error(err)
-
-        # Create context
-        err, context = cuda.cuCtxCreate(0, cuDevice)
-        check_error(err)
-
-        return context
 
     def __copy_arg_data(self,stream):
 
         kernelArgs = self._get_kernel_arguments()
 
         #Allocate buffers and copy data
-        for kernelArg in kernelArgs:
-            kernelArgLen = 1
+        for idx,hostBuffer in enumerate(kernelArgs):
+            
+            dc = DataContainer(hostBuffer,stream)
 
-            #If scalar, use the value directly
-            if len(kernelArg.shape) > 0:
-                kernelArgLen = kernelArg.size
-                bufferSize = kernelArgLen * kernelArg.itemsize
-                err, kernelArgBuffer = cuda.cuMemAlloc(bufferSize)
-                check_error(err)
-                self.kernelArgumentBuffers.append(kernelArgBuffer)
-                err, = cuda.cuMemcpyHtoDAsync(
-                    kernelArgBuffer, kernelArg.ctypes.data, bufferSize, stream
-                    )
-                check_error(err)
-            else:
-                self.kernelArgumentBuffers.append(kernelArg)
+            #Keep it on CPU if scalar
+            if len(hostBuffer.shape) > 0:
+                dc.gpu()
+
+            # if idx == 0:
+            #     testImg = dc.cpu().numpy()
+            #     import cv2
+            #     cv2.imshow("test",testImg.astype(np.uint8))
+
+            self.dataContainers.append(dc)
 
         err, = cuda.cuStreamSynchronize(stream)
 
@@ -110,12 +107,9 @@ class Operation(ABC):
 
         return (numBlocks,1,1),(numThreads,1,1)
 
-    def __run_kernel(self,kernel,stream):
+    def __run_kernel(self,kernel,stream) -> DataContainer:
 
-        kernelArgBufferPointers = [np.array([int(kernelArgumentBuffer)], dtype=np.uint64) if isinstance(kernelArgumentBuffer,cuda.CUdeviceptr) else kernelArgumentBuffer
-                                    for kernelArgumentBuffer in self.kernelArgumentBuffers]
-    
-        args = np.array([arg.ctypes.data for arg in kernelArgBufferPointers], dtype=np.uint64)
+        args = np.array([arg.memAddr() for arg in self.dataContainers], dtype=np.uint64)
 
         # args = np.array([int(arg) for arg in self.kernelArgumentBuffers], dtype=np.uint64)
 
@@ -133,20 +127,9 @@ class Operation(ABC):
     
         check_error(err)
 
-        #Copy output
-
         outIdx = self.__get_kernel_out_idx()
-        outKernelArg = self._get_kernel_arguments()[outIdx]
-        outBufferSize = outKernelArg.size * outKernelArg.itemsize
 
-        err, = cuda.cuMemcpyDtoHAsync(
-        outKernelArg.ctypes.data, self.kernelArgumentBuffers[outIdx], outBufferSize, stream
-        )
-        check_error(err)
-        err, = cuda.cuStreamSynchronize(stream)
-        check_error(err)
-
-        return outKernelArg
+        return self.dataContainers[outIdx]
 
     @abstractmethod
     def __get_kernel(self) -> str:
@@ -164,17 +147,18 @@ class Operation(ABC):
     def __get_kernel_out_idx(self) -> int:
         pass
 
-    def run(self):
-        
-        self.__init_context()
+    def run(self) -> DataContainer:
+    
         kernel = self.__compile_kernel()
         
-        err, stream = cuda.cuStreamCreate(0)
-        check_error(err)
+        self.__copy_arg_data(self.stream)
 
-        self.__copy_arg_data(stream)
+        outputDataContainer = self.__run_kernel(kernel,self.stream)
 
-        output = self.__run_kernel(kernel,stream)
+        return outputDataContainer
 
-        return output
+    def __del__(self):
+        if self.module is not None:
+            err, = cuda.cuModuleUnload(self.module)
+            check_error(err)
 

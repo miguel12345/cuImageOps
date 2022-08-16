@@ -15,7 +15,6 @@ void translate(float* image, float* translate, float* out, unsigned int* dims, u
  if (dstx < width && dsty < height) {
 
    size_t outIdx = dsty*width + dstx;
-   
    out[outIdx] = sample2d(image,srcx,srcy,dims,fillMode,INTERPOLATION_MODE_POINT);
  }
 }

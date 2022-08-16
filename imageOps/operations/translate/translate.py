@@ -1,11 +1,11 @@
 from typing import List, Tuple
-from imageOps.core.image_operation import FillMode, ImageOperation
+from imageOps.core.imageoperation import FillMode, ImageOperation
 import numpy as np
 
 class Translate(ImageOperation):
 
-    def __init__(self, image:np.array, translate:Tuple[int,int], fillMode: FillMode) -> None:
-        super().__init__()
+    def __init__(self, image:np.array, translate:Tuple[int,int], fillMode: FillMode, **kwargs) -> None:
+        super().__init__(**kwargs)
         self.image = image
         self.translate = np.array([*translate],dtype=np.float32)
         self.out = np.zeros_like(self.image,dtype=np.float32)

@@ -15,6 +15,9 @@ class FillMode(IntEnum):
 
 class ImageOperation(Operation):
 
+    def __init__(self, **kwargs) -> None:
+        super().__init__(**kwargs)
+
     def _Operation__get_blocks_threads(self):
 
         numThreads = 16
