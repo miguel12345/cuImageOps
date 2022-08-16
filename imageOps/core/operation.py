@@ -2,7 +2,6 @@
 from abc import ABC, abstractmethod
 from ast import Pass
 import numbers
-from tkinter import E
 from typing import Any, List, Tuple
 from imageOps.utils.cuda import *
 import numpy as np
@@ -15,7 +14,7 @@ class Operation(ABC):
         self.kernelArgumentBuffers = []
 
 
-    def __compile_kernel(self) -> Any:
+    def __compile_kernel(self,debug=True) -> Any:
 
         kernel_name_b = str.encode(self.__get_kernel_name())
 
@@ -26,7 +25,11 @@ class Operation(ABC):
         check_error(err)
 
         # Compile program
-        opts = [b"--fmad=false", b"--gpu-architecture=compute_61",b"--device-debug",b"--generate-line-info",b"--include-path=imageOps\core\cuda"]
+        opts = [b"--gpu-architecture=compute_61",b"--include-path=imageOps/core/cuda"]
+
+        if debug:
+            opts.extend([b"--device-debug",b"--generate-line-info"])
+
         err, = nvrtc.nvrtcCompileProgram(prog, len(opts), opts)
 
         if err != nvrtc.nvrtcResult.NVRTC_SUCCESS:

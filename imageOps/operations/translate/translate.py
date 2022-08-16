@@ -13,7 +13,7 @@ class Translate(ImageOperation):
         self.fillMode = np.array(int(fillMode),np.uint32)
     
     def _Operation__get_kernel(self) -> str:
-        return open("imageOps\\operations\\translate\\translate.cu").read()
+        return open("imageOps/operations/translate/translate.cu").read()
 
     def _Operation__get_kernel_name(self) -> str:
         return "translate"

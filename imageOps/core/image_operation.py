@@ -3,7 +3,6 @@ from abc import ABC, abstractmethod
 from ast import Pass
 from enum import Enum, IntEnum
 import numbers
-from tkinter import E
 from typing import Any, List, Tuple
 from .operation import Operation
 from imageOps.utils.cuda import *
