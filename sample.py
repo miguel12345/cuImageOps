@@ -22,9 +22,9 @@ import cv2
 
 stream = CudaStream()
 
-image = cv2.imread("tests/data/grayscale_dog.jpg",cv2.IMREAD_UNCHANGED)
-op = Translate(image=image.astype(np.float32),translate=[10,40],fillMode=FillMode.REFLECTION, stream=stream)
-output = op.run().cpu().numpy()
+image = cv2.imread("tests/data/rgb_dog.jpg",cv2.IMREAD_UNCHANGED)
+op = Translate(translate=[10,40],fillMode=FillMode.REFLECTION, stream=stream)
+output = op.run(image.astype(np.float32)).cpu().numpy()
 cv2.imshow("Result",output.astype(np.uint8))
 cv2.waitKey()
 print(f"Translate Output \n {output}")

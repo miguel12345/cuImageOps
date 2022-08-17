@@ -33,9 +33,12 @@ class ImageOperation(Operation):
 
     def run(self,input:np.array) -> DataContainer:
         
+        if len(input.shape) < 2:
+            input = np.expand_dims(input,axis=-1)
+            
         self.input = input
         self.output = np.zeros_like(self.input,dtype=np.float32)
-        self.dims = np.array((self.input.shape[0],self.input.shape[1]),dtype=np.uint32)
+        self.dims = np.array(self.input.shape,dtype=np.uint32)
 
         return super()._Operation__run()
 

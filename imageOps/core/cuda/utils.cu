@@ -3,7 +3,7 @@
 
 #define INTERPOLATION_MODE_POINT 1
 
-__device__ float sample2d(float* image, float x, float y, unsigned int* dims, unsigned int fillMode, unsigned int interpolationMode)
+template<typename type> __device__ type sample2d(type* image, float x, float y, unsigned int* dims, unsigned int fillMode, unsigned int interpolationMode, type fillConstant)
 {
 
     unsigned int height = dims[0];
@@ -15,7 +15,7 @@ __device__ float sample2d(float* image, float x, float y, unsigned int* dims, un
 
     if(xInt < 0 || xInt >= width || yInt < 0 || yInt >= height) {
         if (fillMode == FILL_MODE_CONSTANT) {
-            return 0.0;
+            return fillConstant;
         }
         else if (fillMode == FILL_MODE_REFLECTION)
         {
