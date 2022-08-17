@@ -21,22 +21,22 @@ __device__ float sample2d(float* image, float x, float y, unsigned int* dims, un
         {
             if(xInt < 0) {
                 xInt = -xInt;
-                xInt = xInt%width;
+                xInt = (xInt-1)%width;
             }
             else if (xInt >= width)
             {
-                xInt = xInt%width;
+                xInt = (xInt-1)%width;
+                xInt = (width-1) - xInt;
             }
             
             if(yInt < 0) {
                 yInt = -yInt;
-                yInt = yInt%height;
+                yInt = (yInt-1)%height;
                 yInt = (height-1) - yInt;
             }
             else if (yInt >= height)
             {
-                yInt = yInt%height;
-                yInt = (height-1) - yInt;
+                yInt = (yInt-1)%height;
             }
         }
     }

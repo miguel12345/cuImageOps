@@ -80,7 +80,7 @@ class Operation(ABC):
         kernelArgs = self._get_kernel_arguments()
 
         #Allocate buffers and copy data
-        for idx,hostBuffer in enumerate(kernelArgs):
+        for hostBuffer in kernelArgs:
             
             dc = DataContainer(hostBuffer,stream)
 
@@ -88,14 +88,7 @@ class Operation(ABC):
             if len(hostBuffer.shape) > 0:
                 dc.gpu()
 
-            # if idx == 0:
-            #     testImg = dc.cpu().numpy()
-            #     import cv2
-            #     cv2.imshow("test",testImg.astype(np.uint8))
-
             self.dataContainers.append(dc)
-
-        err, = cuda.cuStreamSynchronize(stream)
 
     def __get_blocks_threads(self):
 
@@ -147,7 +140,7 @@ class Operation(ABC):
     def __get_kernel_out_idx(self) -> int:
         pass
 
-    def run(self) -> DataContainer:
+    def __run(self) -> DataContainer:
     
         kernel = self.__compile_kernel()
         

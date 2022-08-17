@@ -9,8 +9,8 @@ RUN apt install -y openssh-server
 RUN apt install -y git
 RUN wget -O /tmp/get-pip.py https://bootstrap.pypa.io/get-pip.py
 RUN python3.8 /tmp/get-pip.py
-RUN pip install cuda-python
-RUN pip install numpy
-RUN pip install opencv-python
+COPY requirements.txt /tmp/requirements.txt
+WORKDIR /tmp
+RUN pip install -r requirements.txt
 RUN rm -rf /var/lib/apt/lists/*
 COPY .ssh/* /root/.ssh/
