@@ -3,6 +3,22 @@
 
 #define INTERPOLATION_MODE_POINT 1
 
+__device__ float radians(float a)
+{
+  return 0.017453292 * a;
+}
+
+__device__ float2 rotate(float2 point, float theta){
+    float thetarad = radians(theta);
+    float thetasin = sin(thetarad);
+    float thetacos = cos(thetarad);
+
+    float rotX = point.x * thetacos - point.y * thetasin;
+    float rotY = point.y * thetacos + point.x * thetasin;
+
+    return make_float2(rotX,rotY);
+}
+
 template<typename type> __device__ type sample2d(type* image, float x, float y, unsigned int* dims, unsigned int fillMode, unsigned int interpolationMode, type fillConstant)
 {
 

@@ -1,5 +1,6 @@
 from textwrap import fill
 from imageOps.core.cuda.stream import CudaStream
+from imageOps.operations.rotate.rotate import Rotate
 from imageOps.operations.saxpy.saxpy import *
 from imageOps.operations.scale.scale import *
 
@@ -23,7 +24,7 @@ import cv2
 stream = CudaStream()
 
 image = cv2.imread("tests/data/rgb_dog.jpg",cv2.IMREAD_UNCHANGED)
-op = Scale(scale=[2.0,0.5],pivot=[0.5,0.5],fillMode=FillMode.CONSTANT, stream=stream)
+op = Rotate(theta=-10,pivot=[0.5,0.5],fillMode=FillMode.CONSTANT, stream=stream)
 output = op.run(image.astype(np.float32)).cpu().numpy()
 cv2.imshow("Result",output.astype(np.uint8))
 cv2.waitKey()
