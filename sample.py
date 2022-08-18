@@ -1,7 +1,6 @@
 from textwrap import fill
 from imageOps.core.cuda.stream import CudaStream
 from imageOps.operations.rotate.rotate import Rotate
-from imageOps.operations.saxpy.saxpy import *
 from imageOps.operations.scale.scale import *
 
 import os

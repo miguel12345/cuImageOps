@@ -2,6 +2,7 @@
 #define FILL_MODE_REFLECTION 2
 
 #define INTERPOLATION_MODE_POINT 1
+#define INTERPOLATION_MODE_LINEAR 1
 
 __device__ float radians(float a)
 {
@@ -19,7 +20,7 @@ __device__ float2 rotate(float2 point, float theta){
     return make_float2(rotX,rotY);
 }
 
-template<typename type> __device__ type sample2d(type* image, float x, float y, unsigned int* dims, unsigned int fillMode, unsigned int interpolationMode, type fillConstant)
+template<typename type> __device__ type pointsample2d(type* image, float x, float y, unsigned int* dims, unsigned int fillMode,type fillConstant)
 {
 
     unsigned int height = dims[0];
@@ -58,4 +59,46 @@ template<typename type> __device__ type sample2d(type* image, float x, float y, 
     }
     
     return image[yInt*width + xInt];
+}
+
+
+template<typename type> __device__ type bilinearsample2d(type* image, float x, float y, unsigned int* dims, unsigned int fillMode, type fillConstant)
+{
+
+    //Determine the four corners
+
+    float2 tl = make_float2(floorf(x),floorf(y));
+    float2 tr = make_float2(ceilf(x),floorf(y));
+    float2 bl = make_float2(floorf(x),ceilf(y));
+    float2 br = make_float2(ceilf(x),ceilf(y));
+
+    //Sample the four corners
+    
+    type tlval = pointsample2d(image,tl.x,tl.y,dims,fillMode,fillConstant);
+    type trval = pointsample2d(image,tr.x,tr.y,dims,fillMode,fillConstant);
+    type blval = pointsample2d(image,bl.x,bl.y,dims,fillMode,fillConstant);
+    type brval = pointsample2d(image,br.x,br.y,dims,fillMode,fillConstant);
+
+    float area = (tr.x-bl.x)*(tr.y-bl.y);
+
+    //Calculate interpolation weights
+
+    float wtl = ((br.x-x)*(br.y-y))/area;
+    float wtr = ((x-bl.x)*(bl.y-y))/area;
+    float wbl = ((tr.x-x)*(y-tr.y))/area;
+    float wbr = ((x-tl.x)*(y-tl.y))/area;
+
+    //Return interpolated result
+    return tlval*wtl + trval*wtr + blval*wbl + brval*wbr;
+
+}
+
+template<typename type> __device__ type sample2d(type* image, float x, float y, unsigned int* dims, unsigned int fillMode,unsigned int interpolationMode, type fillConstant) {
+
+    if(interpolationMode == INTERPOLATION_MODE_POINT) {
+        return pointsample2d(image,x,y,dims,fillMode,fillConstant);
+    }
+    else if(interpolationMode == INTERPOLATION_MODE_LINEAR) {
+        return bilinearsample2d(image,x,y,dims,fillMode,fillConstant);
+    }
 }
