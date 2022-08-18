@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-from imageOps.core.imageoperation import FillMode
+from imageOps.core.imageoperation import FillMode, InterpolationMode
 from imageOps.operations.rotate.rotate import Rotate
 
 from imageOps.operations.scale.scale import Scale
@@ -36,3 +36,33 @@ def test_rotate_90deg(square_image_grayscale,default_stream):
         ,dtype=np.float32)
 
     assert np.array_equal(result,expected_result)
+
+
+def test_rotate_90deg_bilinear(square_image_grayscale,default_stream):
+
+    op = Rotate(theta=90,pivot=[0.5,0.5],fillMode=FillMode.CONSTANT,interpolationMode=InterpolationMode.LINEAR,stream=default_stream)
+
+    result = op.run(square_image_grayscale).cpu().numpy()
+
+    expected_result = np.array(
+        [
+        [1,1,1,1,1],
+        [1,1,1,1,1],
+        [1,1,1,1,1],
+        [1,1,1,1,1],
+        [1,2,3,4,5]
+        ]
+        ,dtype=np.float32)
+
+    assert np.allclose(result,expected_result)
+
+
+def test_rotate_360deg_bilinear(square_image_grayscale,default_stream):
+
+    op = Rotate(theta=360,pivot=[0.5,0.5],fillMode=FillMode.CONSTANT,interpolationMode=InterpolationMode.LINEAR,stream=default_stream)
+
+    result = op.run(square_image_grayscale).cpu().numpy()
+
+    expected_result = square_image_grayscale
+
+    assert np.allclose(result,expected_result)

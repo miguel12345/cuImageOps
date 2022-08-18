@@ -11,6 +11,10 @@ class FillMode(IntEnum):
     CONSTANT = 1,
     REFLECTION = 2
 
+class InterpolationMode(IntEnum):
+    POINT = 1,
+    LINEAR = 2
+
 class ImageOperation(Operation):
 
     def __init__(self, **kwargs) -> None:

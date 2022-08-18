@@ -2,7 +2,15 @@
 #define FILL_MODE_REFLECTION 2
 
 #define INTERPOLATION_MODE_POINT 1
-#define INTERPOLATION_MODE_LINEAR 1
+#define INTERPOLATION_MODE_LINEAR 2
+
+inline __device__ float3 operator*(float3 a,float b) {
+    return make_float3(a.x*b,a.y*b,a.z*b);
+}
+
+inline __device__ float3 operator+(float3 a,float3 b) {
+    return make_float3(a.x+b.x,a.y+b.y,a.z+b.z);
+}
 
 __device__ float radians(float a)
 {
@@ -65,12 +73,14 @@ template<typename type> __device__ type pointsample2d(type* image, float x, floa
 template<typename type> __device__ type bilinearsample2d(type* image, float x, float y, unsigned int* dims, unsigned int fillMode, type fillConstant)
 {
 
+    
+
     //Determine the four corners
 
     float2 tl = make_float2(floorf(x),floorf(y));
-    float2 tr = make_float2(ceilf(x),floorf(y));
-    float2 bl = make_float2(floorf(x),ceilf(y));
-    float2 br = make_float2(ceilf(x),ceilf(y));
+    float2 tr = make_float2(floorf(x+1),floorf(y));
+    float2 bl = make_float2(floorf(x),floorf(y+1));
+    float2 br = make_float2(floorf(x+1),floorf(y+1));
 
     //Sample the four corners
     
@@ -79,7 +89,7 @@ template<typename type> __device__ type bilinearsample2d(type* image, float x, f
     type blval = pointsample2d(image,bl.x,bl.y,dims,fillMode,fillConstant);
     type brval = pointsample2d(image,br.x,br.y,dims,fillMode,fillConstant);
 
-    float area = (tr.x-bl.x)*(tr.y-bl.y);
+    float area = (tr.x-bl.x)*(bl.y-tl.y);
 
     //Calculate interpolation weights
 
