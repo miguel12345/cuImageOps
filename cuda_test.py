@@ -4,7 +4,7 @@ import os
 
 os.add_dll_directory(os.path.join(os.environ["CUDA_PATH"],"bin"))
 
-saxpy = open("imageOps\operations\saxpy\saxpy.cu").read()
+saxpy = open("cuImageOps\operations\saxpy\saxpy.cu").read()
 
 def ASSERT_DRV(err):
     if isinstance(err, cuda.CUresult):

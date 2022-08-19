@@ -1,6 +1,6 @@
 from cuda import cuda
 
-from imageOps.utils.cuda import check_error
+from cuImageOps.utils.cuda import check_error
 
 class CudaContext():
 

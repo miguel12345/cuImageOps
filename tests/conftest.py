@@ -6,7 +6,7 @@ repo_path = abspath(dirname(dirname(__file__)))
 sys.path.insert(1, repo_path)
 
 
-from imageOps.core.cuda.stream import CudaStream
+from cuImageOps.core.cuda.stream import CudaStream
 
 @pytest.fixture(scope="session")
 def default_stream():

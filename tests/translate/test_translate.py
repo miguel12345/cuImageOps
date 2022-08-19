@@ -1,8 +1,8 @@
 import pytest
 import numpy as np
-from imageOps.core.imageoperation import FillMode
+from cuImageOps.core.imageoperation import FillMode
 
-from imageOps.operations.translate.translate import Translate
+from cuImageOps.operations.translate.translate import Translate
 
 
 

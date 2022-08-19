@@ -2,7 +2,7 @@ from typing import Any, Tuple
 from cuda import cuda
 import numpy as np
 
-from imageOps.utils.cuda import check_error
+from cuImageOps.utils.cuda import check_error
 
 class DataContainer():
     def __init__(self, hostBuffer: np.array, stream: any) -> None:

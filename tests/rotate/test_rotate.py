@@ -1,9 +1,8 @@
 import pytest
 import numpy as np
-from imageOps.core.imageoperation import FillMode, InterpolationMode
-from imageOps.operations.rotate.rotate import Rotate
-
-from imageOps.operations.scale.scale import Scale
+from cuImageOps.core.imageoperation import FillMode, InterpolationMode
+from cuImageOps.operations.rotate.rotate import Rotate
+from cuImageOps.operations.scale.scale import Scale
 
 
 

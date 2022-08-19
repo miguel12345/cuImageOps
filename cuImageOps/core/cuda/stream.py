@@ -1,7 +1,7 @@
 from cuda import cuda
-from imageOps.core.cuda.context import CudaContext
+from cuImageOps.core.cuda.context import CudaContext
 
-from imageOps.utils.cuda import check_error
+from cuImageOps.utils.cuda import check_error
 
 class CudaStream():
     _defaultContext = None

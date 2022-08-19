@@ -8,7 +8,7 @@ from .cuda.stream import CudaStream
 
 from .datacontainer import DataContainer
 from .cuda.context import CudaContext
-from imageOps.utils.cuda import *
+from cuImageOps.utils.cuda import *
 import numpy as np
 import math
 
@@ -20,6 +20,7 @@ class Operation(ABC):
         super().__init__()
         self.dataContainers : List[DataContainer] = []
         self.module = None
+        self.kernel = None
         self.stream = stream.stream
 
         if self.stream is None:
@@ -40,7 +41,7 @@ class Operation(ABC):
         check_error(err)
 
         # Compile program
-        opts = [b"--gpu-architecture=compute_61",b"--include-path=imageOps/core/cuda"]
+        opts = [b"--gpu-architecture=compute_61",b"--include-path=cuImageOps/core/cuda"]
 
         if debug:
             opts.extend([b"--device-debug",b"--generate-line-info"])
@@ -51,7 +52,7 @@ class Operation(ABC):
             err, logSize = nvrtc.nvrtcGetProgramLogSize(prog)
             compileLog = b" " * logSize
             nvrtc.nvrtcGetProgramLog(prog, compileLog)
-            raise RuntimeError("Nvrtc Compile error: {}".format(compileLog))
+            raise RuntimeError("Nvrtc Compile error: {}".format(compileLog.decode()))
 
         check_error(err)
 
@@ -76,6 +77,8 @@ class Operation(ABC):
         return kernel
 
     def __copy_arg_data(self,stream):
+
+        self.dataContainers.clear()
 
         kernelArgs = self._get_kernel_arguments()
 
@@ -142,11 +145,12 @@ class Operation(ABC):
 
     def __run(self) -> DataContainer:
     
-        kernel = self.__compile_kernel()
+        if self.kernel is None:
+            self.kernel = self.__compile_kernel()
         
         self.__copy_arg_data(self.stream)
 
-        outputDataContainer = self.__run_kernel(kernel,self.stream)
+        outputDataContainer = self.__run_kernel(self.kernel,self.stream)
 
         return outputDataContainer
 

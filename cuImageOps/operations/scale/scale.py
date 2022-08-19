@@ -1,5 +1,5 @@
 from typing import List, Tuple
-from imageOps.core.imageoperation import FillMode, ImageOperation, InterpolationMode
+from cuImageOps.core.imageoperation import FillMode, ImageOperation, InterpolationMode
 import numpy as np
 
 class Scale(ImageOperation):
@@ -12,7 +12,7 @@ class Scale(ImageOperation):
         self.interpolationMode = np.array(int(interpolationMode),np.uint32)
     
     def _Operation__get_kernel(self) -> str:
-        return open(f"imageOps/operations/{self._Operation__get_kernel_name()}/{self._Operation__get_kernel_name()}.cu").read()
+        return open(f"cuImageOps/operations/{self._Operation__get_kernel_name()}/{self._Operation__get_kernel_name()}.cu").read()
 
     def _Operation__get_kernel_name(self) -> str:
         return "scale"

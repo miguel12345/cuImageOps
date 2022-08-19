@@ -21,13 +21,12 @@ void rotate(float* image,float* out, float theta, float* _pivot, unsigned int* d
 
   size_t outIdx = dsty*width + dstx;
 
-  
-    if(dstx == 735 && dsty == 189){
-        printf("srcPoint.x %.2f\n",srcPoint.x);
-        printf("srcPoint.y %.2f\n",srcPoint.y);
-    }
-
-  if(channels == 3){
+  if(channels == 4){
+    float4* image4c = (float4*)&image[0];
+    float4* out4c = (float4*)&out[0];
+    out4c[outIdx] = sample2d<float4>(image4c,srcPoint.x,srcPoint.y,dims,fillMode,interpolationMode,make_float4(0.0f,0.0f,0.0f,0.0f));
+  }
+  else if(channels == 3){
     float3* image3c = (float3*)&image[0];
     float3* out3c = (float3*)&out[0];
     out3c[outIdx] = sample2d<float3>(image3c,srcPoint.x,srcPoint.y,dims,fillMode,interpolationMode,make_float3(0.0f,0.0f,0.0f));

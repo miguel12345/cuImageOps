@@ -1,9 +1,9 @@
 
 from enum import IntEnum
 
-from imageOps.core.datacontainer import DataContainer
+from cuImageOps.core.datacontainer import DataContainer
 from .operation import Operation
-from imageOps.utils.cuda import *
+from cuImageOps.utils.cuda import *
 import numpy as np
 import math
 
@@ -36,6 +36,8 @@ class ImageOperation(Operation):
         return (numBlocksX,numBlocksY,1),(numThreads,numThreads,1)
 
     def run(self,input:np.array) -> DataContainer:
+
+        input = input.astype(np.float32)
         
         if len(input.shape) < 2:
             input = np.expand_dims(input,axis=-1)

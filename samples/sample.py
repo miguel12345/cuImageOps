@@ -1,8 +1,8 @@
 from textwrap import fill
-from imageOps.core.cuda.stream import CudaStream
-from imageOps.core.imageoperation import InterpolationMode
-from imageOps.operations.rotate.rotate import Rotate
-from imageOps.operations.scale.scale import *
+from cuImageOps.core.cuda.stream import CudaStream
+from cuImageOps.core.imageoperation import InterpolationMode
+from cuImageOps.operations.rotate.rotate import Rotate
+from cuImageOps.operations.scale.scale import *
 
 import os
 
