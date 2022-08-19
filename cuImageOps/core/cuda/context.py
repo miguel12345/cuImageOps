@@ -21,5 +21,6 @@ class CudaContext():
         check_error(err)
 
     def __del__(self):
-        err, = cuda.cuCtxDestroy(self.context)
-        check_error(err)
+        if self.context is not None:
+            err, = cuda.cuCtxDestroy(self.context)
+            check_error(err)

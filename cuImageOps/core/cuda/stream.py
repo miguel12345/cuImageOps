@@ -10,6 +10,7 @@ class CudaStream():
         super().__init__()
         self.module = None
         self.context = context
+        self.stream = None
 
         if self.context is None:
 
@@ -22,5 +23,6 @@ class CudaStream():
         check_error(err)
 
     def __del__(self):
-        err, = cuda.cuStreamDestroy(self.stream)
-        check_error(err)
+        if self.stream is not None:
+            err, = cuda.cuStreamDestroy(self.stream)
+            check_error(err)
