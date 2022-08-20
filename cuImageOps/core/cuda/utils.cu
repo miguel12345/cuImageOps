@@ -58,18 +58,18 @@ template<typename type> __device__ type pointsample2d(type* image, float x, floa
             }
             else if (xInt >= width)
             {
-                xInt = (xInt-1)%width;
+                xInt = xInt%width;
                 xInt = (width-1) - xInt;
             }
             
             if(yInt < 0) {
                 yInt = -yInt;
                 yInt = (yInt-1)%height;
-                yInt = (height-1) - yInt;
             }
             else if (yInt >= height)
             {
-                yInt = (yInt-1)%height;
+                yInt = yInt%height;
+                yInt = (height-1) - yInt;
             }
         }
     }
@@ -98,7 +98,7 @@ template<typename type> __device__ type bilinearsample2d(type* image, float x, f
     type brval = pointsample2d(image,br.x,br.y,dims,fillMode,fillConstant);
 
     float area = (tr.x-bl.x)*(bl.y-tl.y);
-
+    
     //Calculate interpolation weights
 
     float wtl = ((br.x-x)*(br.y-y))/area;
@@ -123,3 +123,24 @@ template<typename type> __device__ type sample2d(type* image, float x, float y, 
     assert(false);
     return type();
 }
+
+
+__device__ void sampleAndAssign(float* input, float* output,float2 inputPos,unsigned int outputIndex, unsigned int* dims, unsigned int fillMode, unsigned int interpolationMode) {
+    
+    unsigned int channels = dims[2];
+
+    if(channels == 4){
+        float4* input4c = (float4*)&input[0];
+        float4* out4c = (float4*)&output[0];
+        out4c[outputIndex] = sample2d<float4>(input4c,inputPos.x,inputPos.y,dims,fillMode,interpolationMode,make_float4(0.0f,0.0f,0.0f,0.0f));
+    }
+    else if(channels == 3){
+        float3* input3c = (float3*)&input[0];
+        float3* out3c = (float3*)&output[0];
+        out3c[outputIndex] = sample2d<float3>(input3c,inputPos.x,inputPos.y,dims,fillMode,interpolationMode,make_float3(0.0f,0.0f,0.0f));
+    }
+    else{
+        output[outputIndex] = sample2d<float>(input,inputPos.x,inputPos.y,dims,fillMode,interpolationMode,0.0f);
+    }
+}
+

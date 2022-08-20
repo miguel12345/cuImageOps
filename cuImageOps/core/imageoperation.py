@@ -39,12 +39,14 @@ class ImageOperation(Operation):
 
         input = input.astype(np.float32)
         
-        if len(input.shape) < 2:
-            input = np.expand_dims(input,axis=-1)
-            
+        inputShape = input.shape
+
+        if len(input.shape) <= 2:
+            inputShape = (*inputShape,1)
+
         self.input = input
         self.output = np.zeros_like(self.input,dtype=np.float32)
-        self.dims = np.array(self.input.shape,dtype=np.uint32)
+        self.dims = np.array(inputShape,dtype=np.uint32)
 
         return super()._Operation__run()
 
