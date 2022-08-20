@@ -7,6 +7,13 @@ class GaussianBlur(ImageOperation):
 
     def __init__(self, kernelSize: int, sigma: float, fillMode: FillMode = FillMode.CONSTANT,interpolationMode = InterpolationMode.POINT, **kwargs) -> None:
         super().__init__(**kwargs)
+
+        if kernelSize % 2 == 0:
+            raise ValueError("Gaussian blur only accepts odd kernel sizes")
+
+        if kernelSize < 0:
+            raise ValueError("Gaussian blur only positive kernel sizes")
+
         self.kernelSize = kernelSize
         self.sigma = sigma
         self.fillMode = fillMode
