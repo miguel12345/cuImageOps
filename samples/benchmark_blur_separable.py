@@ -1,20 +1,17 @@
+from functools import partial
 import timeit
 import cv2
 from cuImageOps.core.cuda.stream import CudaStream
 from cuImageOps.core.imageoperation import FillMode, InterpolationMode
-from cuImageOps.operations.affine.affine import Affine
 from cuImageOps.operations.gaussianblur.gaussianblur import GaussianBlur
-from cuImageOps.operations.rotate.rotate import Rotate
 
-image = cv2.imread(
-    "/workspaces/imageOps/tests/data/grayscale_dog.jpg", cv2.IMREAD_UNCHANGED
-)
+image = cv2.imread("/workspace/tests/data/grayscale_dog.jpg", cv2.IMREAD_UNCHANGED)
 
 stream = CudaStream()
 
 for kernel_size in [1, 3, 7, 9, 11, 13, 15, 17, 19, 21]:
 
-    separableGaussianBlurOp = GaussianBlur(
+    separable_gaussian_blur_op = GaussianBlur(
         kernel_size=kernel_size,
         sigma=100.0,
         use_separable_filter=True,
@@ -22,7 +19,7 @@ for kernel_size in [1, 3, 7, 9, 11, 13, 15, 17, 19, 21]:
         fillMode=FillMode.REFLECTION,
         stream=stream,
     )
-    nonseparableGaussianBlurOp = GaussianBlur(
+    non_separable_gaussian_blur_op = GaussianBlur(
         kernel_size=kernel_size,
         sigma=100.0,
         use_separable_filter=False,
@@ -31,15 +28,12 @@ for kernel_size in [1, 3, 7, 9, 11, 13, 15, 17, 19, 21]:
         stream=stream,
     )
 
-    def runSeparableGaussianBlurOp():
-        separableGaussianBlurOp.run(image).cpu()
-
-    def runNonSeparableGaussianBlurOp():
-        nonseparableGaussianBlurOp.run(image).cpu()
+    def run_op(operation, img):
+        operation.run(img).cpu()
 
     print(
-        f"Separable implementation for kernel size {kernel_size} takes {timeit.timeit(runSeparableGaussianBlurOp,number=100)} seconds"
+        f"Separable implementation for kernel size {kernel_size} takes {timeit.timeit(partial(run_op,separable_gaussian_blur_op,image),number=100)} seconds"
     )
     print(
-        f"Full implementation for kernel size {kernel_size} takes {timeit.timeit(runNonSeparableGaussianBlurOp,number=100)} seconds"
+        f"Full implementation for kernel size {kernel_size} takes {timeit.timeit(partial(run_op,non_separable_gaussian_blur_op,image),number=100)} seconds"
     )

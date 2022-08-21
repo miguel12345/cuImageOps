@@ -12,6 +12,9 @@
 	"remoteEnv": {
 		"DISPLAY": "host.docker.internal:0"
 	},
+	"workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+	"workspaceFolder": "/workspace",
+	"postStartCommand": "pip install --user -e /workspace",
 	// Configure tool-specific properties.
 	"customizations": {
 		// Configure properties specific to VS Code.

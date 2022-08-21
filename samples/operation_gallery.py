@@ -12,7 +12,7 @@ image = cv2.imread(
     "/workspaces/imageOps/tests/data/grayscale_dog.jpg", cv2.IMREAD_UNCHANGED
 )
 
-gaussianBlurOp = GaussianBlur(
+gaussian_blur_op = GaussianBlur(
     kernel_size=5,
     sigma=100.0,
     use_separable_filter=True,
@@ -20,13 +20,18 @@ gaussianBlurOp = GaussianBlur(
     fillMode=FillMode.REFLECTION,
     stream=stream,
 )
-gaussianBlurResult = gaussianBlurOp.run(image).cpu().numpy()
-gaussianBlurResult = cv2.putText(
-    gaussianBlurResult, "Gaussian blur", (5, 20), cv2.FONT_HERSHEY_PLAIN, 1.0, (0, 0, 0)
+gaussian_blur_result = gaussian_blur_op.run(image).cpu().numpy()
+gaussian_blur_result = cv2.putText(
+    gaussian_blur_result,
+    "Gaussian blur",
+    (5, 20),
+    cv2.FONT_HERSHEY_PLAIN,
+    1.0,
+    (0, 0, 0),
 )
 
 
-affineOp = Affine(
+affine_op = Affine(
     translate=(10, 10),
     rotate=45,
     scale=(0.5, 1.0),
@@ -34,12 +39,12 @@ affineOp = Affine(
     fillMode=FillMode.REFLECTION,
     stream=stream,
 )
-affineResult = affineOp.run(image).cpu().numpy()
-affineResult = cv2.putText(
-    affineResult, "Affine", (5, 20), cv2.FONT_HERSHEY_PLAIN, 1.0, (0, 0, 0)
+affine_result = affine_op.run(image).cpu().numpy()
+affine_result = cv2.putText(
+    affine_result, "Affine", (5, 20), cv2.FONT_HERSHEY_PLAIN, 1.0, (0, 0, 0)
 )
 
-finalResult = cv2.hconcat([affineResult, gaussianBlurResult])
+final_result = cv2.hconcat([affine_result, gaussian_blur_result])
 
-cv2.imshow("Result", finalResult.astype(np.uint8))
+cv2.imshow("Result", final_result.astype(np.uint8))
 cv2.waitKey()
