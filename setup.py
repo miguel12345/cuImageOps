@@ -5,5 +5,5 @@ setup(
     version="0.1.0",
     author="Miguel Ferreira",
     packages=find_packages(),
-    license="MIT"
+    license="MIT",
 )

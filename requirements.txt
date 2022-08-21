@@ -2,3 +2,5 @@ cuda-python==11.7.1
 numpy==1.23.2
 opencv-python==4.6.0.66
 pytest==7.1.2
+black
+pylint

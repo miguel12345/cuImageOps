@@ -8,6 +8,7 @@ sys.path.insert(1, repo_path)
 
 from cuImageOps.core.cuda.stream import CudaStream
 
+
 @pytest.fixture(scope="session")
 def default_stream():
     return CudaStream()

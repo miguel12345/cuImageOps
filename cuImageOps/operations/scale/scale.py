@@ -1,51 +1,75 @@
 import os
-from typing import List, Tuple
+from typing import Tuple
+import numpy as np
 import cuImageOps
 from cuImageOps.core.datacontainer import DataContainer
 from cuImageOps.core.imageoperation import FillMode, ImageOperation, InterpolationMode
-import numpy as np
+import cuImageOps.utils.cuda as cuda_utils
 
-from cuImageOps.utils.cuda import compile_module, copy_data_to_device, get_kernel, get_kernel_launch_dims, run_kernel
 
 class Scale(ImageOperation):
-
-    def __init__(self, scale:Tuple[float,float],pivot:Tuple[float,float] = (0.0,0.0), fillMode: FillMode = FillMode.CONSTANT,interpolationMode = InterpolationMode.POINT, **kwargs) -> None:
+    def __init__(
+        self,
+        scale: Tuple[float, float],
+        pivot: Tuple[float, float] = (0.0, 0.0),
+        fillMode: FillMode = FillMode.CONSTANT,
+        interpolationMode=InterpolationMode.POINT,
+        **kwargs,
+    ) -> None:
         super().__init__(**kwargs)
-        self.scale = np.array([*scale],dtype=np.float32)
-        self.pivot = np.array([*pivot],dtype=np.float32)
-        self.fillMode = np.array(int(fillMode),np.uint32)
-        self.interpolationMode = np.array(int(interpolationMode),np.uint32)
-    
+        self.scale = np.array([*scale], dtype=np.float32)
+        self.pivot = np.array([*pivot], dtype=np.float32)
+        self.fill_mode = np.array(int(fillMode), np.uint32)
+        self.interpolation_mode = np.array(int(interpolationMode), np.uint32)
+        self.dims = None
+
     def __get_module_path(self) -> str:
-        return os.path.join(os.path.dirname(cuImageOps.__file__), "operations", self.__get_kernel_name(), f"{self.__get_kernel_name()}.cu")
+        return os.path.join(
+            os.path.dirname(cuImageOps.__file__),
+            "operations",
+            self.__get_kernel_name(),
+            f"{self.__get_kernel_name()}.cu",
+        )
 
     def __get_kernel_name(self) -> str:
         return "scale"
 
-    def run(self,imageInput:np.array) -> DataContainer:
+    def run(self, image_input: np.array) -> DataContainer:
 
-        imageInput = imageInput.astype(np.float32)
-        
-        inputShape = imageInput.shape
+        image_input = image_input.astype(np.float32)
 
-        if len(imageInput.shape) <= 2:
-            inputShape = (*inputShape,1)
+        input_shape = image_input.shape
 
-        self.input = imageInput
-        self.output = np.zeros_like(self.input,dtype=np.float32)
-        self.dims = np.array(inputShape,dtype=np.uint32)
+        if len(image_input.shape) <= 2:
+            input_shape = (*input_shape, 1)
+
+        self.input = image_input
+        self.output = np.zeros_like(self.input, dtype=np.float32)
+        self.dims = np.array(input_shape, dtype=np.uint32)
 
         if self.module is None:
-            self.module = compile_module(self.__get_module_path(),debug=True)
-            self.kernel = get_kernel(self.module,self.__get_kernel_name())
+            self.module = cuda_utils.compile_module(
+                self.__get_module_path(), debug=True
+            )
+            self.kernel = cuda_utils.get_kernel(self.module, self.__get_kernel_name())
 
-        kernelArguments = [self.output,self.input,self.scale,self.pivot,self.dims,self.fillMode,self.interpolationMode]
+        kernel_arguments = [
+            self.output,
+            self.input,
+            self.scale,
+            self.pivot,
+            self.dims,
+            self.fill_mode,
+            self.interpolation_mode,
+        ]
 
-        dataContainers = copy_data_to_device(kernelArguments,self.stream)
+        data_containers = cuda_utils.copy_data_to_device(kernel_arguments, self.stream)
 
-        blocks, threads = get_kernel_launch_dims(self.input)
+        blocks, threads = cuda_utils.get_kernel_launch_dims(self.input)
 
-        run_kernel(self.kernel,blocks,threads,dataContainers,self.stream)
+        cuda_utils.run_kernel(
+            self.kernel, blocks, threads, data_containers, self.stream
+        )
 
-        #Output is at index 0
-        return dataContainers[0]
+        # Output is at index 0
+        return data_containers[0]

@@ -2,14 +2,14 @@ from cuda import cuda
 
 from cuImageOps.utils.cuda import check_error
 
-class CudaContext():
 
+class CudaContext:
     def __init__(self, deviceIdx: int = 0) -> None:
-        
+
         self.context = None
 
         # Initialize CUDA Driver API
-        err, = cuda.cuInit(0)
+        (err,) = cuda.cuInit(0)
         check_error(err)
 
         # Retrieve handle for device 0
@@ -22,5 +22,5 @@ class CudaContext():
 
     def __del__(self):
         if self.context is not None:
-            err, = cuda.cuCtxDestroy(self.context)
+            (err,) = cuda.cuCtxDestroy(self.context)
             check_error(err)

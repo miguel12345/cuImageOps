@@ -3,7 +3,8 @@ from cuImageOps.core.cuda.context import CudaContext
 
 from cuImageOps.utils.cuda import check_error
 
-class CudaStream():
+
+class CudaStream:
     _defaultContext = None
 
     def __init__(self, context: CudaContext = None) -> None:
@@ -18,11 +19,11 @@ class CudaStream():
                 CudaStream._defaultContext = CudaContext()
 
             self.context = CudaStream._defaultContext
-        
+
         err, self.stream = cuda.cuStreamCreate(0)
         check_error(err)
 
     def __del__(self):
         if self.stream is not None:
-            err, = cuda.cuStreamDestroy(self.stream)
+            (err,) = cuda.cuStreamDestroy(self.stream)
             check_error(err)
