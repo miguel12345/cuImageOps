@@ -1,7 +1,9 @@
 from typing import List, Tuple
+import cuImageOps
 from cuImageOps.core.datacontainer import DataContainer
 from cuImageOps.core.imageoperation import FillMode, ImageOperation, InterpolationMode
 import numpy as np
+import os
 
 from cuImageOps.utils.cuda import *
 
@@ -15,7 +17,7 @@ class Rotate(ImageOperation):
         self.interpolationMode = np.array(int(interpolationMode),np.uint32)
     
     def __get_module_path(self) -> str:
-        return f"cuImageOps/operations/{self.__get_kernel_name()}/{self.__get_kernel_name()}.cu"
+        return os.path.join(os.path.dirname(cuImageOps.__file__), "operations", self.__get_kernel_name(), f"{self.__get_kernel_name()}.cu")
 
     def __get_kernel_name(self) -> str:
         return "rotate"

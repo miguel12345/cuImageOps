@@ -1,5 +1,7 @@
+import os
 from typing import List
 import numpy as np
+import cuImageOps
 from cuImageOps.core.datacontainer import DataContainer
 from cuImageOps.core.imageoperation import FillMode, ImageOperation, InterpolationMode
 from cuImageOps.utils.cuda import *
@@ -23,8 +25,8 @@ class GaussianBlur(ImageOperation):
         self.useSeparableFilter = useSeparableFilter
     
     def __get_module_path(self) -> str:
-        return "cuImageOps/operations/gaussianblur/gaussianblur.cu"
-
+        return os.path.join(os.path.dirname(cuImageOps.__file__), "operations", "gaussianblur", "gaussianblur.cu")
+        
     def __compute_2d_convolution_kernel(self) -> np.array:
         effectiveKernelSize = self.kernelSize-1
         gaussian1d =np.expand_dims(np.array([gaussian(x,self.sigma) for x in range(int(-effectiveKernelSize/2),int(effectiveKernelSize/2)+1)],dtype=np.float32),-1)

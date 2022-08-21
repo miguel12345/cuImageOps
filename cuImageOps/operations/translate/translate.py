@@ -1,4 +1,6 @@
+import os
 from typing import List, Tuple
+import cuImageOps
 from cuImageOps.core.datacontainer import DataContainer
 from cuImageOps.core.imageoperation import FillMode, ImageOperation, InterpolationMode
 import numpy as np
@@ -22,7 +24,7 @@ class Translate(ImageOperation):
         self._translate = t
 
     def __get_module_path(self) -> str:
-        return "cuImageOps/operations/translate/translate.cu"
+        return os.path.join(os.path.dirname(cuImageOps.__file__), "operations", self.__get_kernel_name(), f"{self.__get_kernel_name()}.cu")
 
     def __get_kernel_name(self) -> str:
         return "translate"

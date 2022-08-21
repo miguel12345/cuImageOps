@@ -1,7 +1,9 @@
+import os
 from typing import List, Tuple
 from cuda import cuda, nvrtc
 import numpy as np
 import math
+import cuImageOps
 from cuImageOps.core.datacontainer import DataContainer
 
 def check_error(err):
@@ -19,7 +21,8 @@ def compile_module(module_path, debug=True):
     err, prog = nvrtc.nvrtcCreateProgram(str.encode(open(module_path).read()), str.encode(module_path), 0, [], [])
 
     check_error(err)
-    opts = [b"--gpu-architecture=compute_61", b"--include-path=cuImageOps/core/cuda"]
+    cuda_include_path = os.path.join(os.path.dirname(cuImageOps.__file__), "core", "cuda")
+    opts = [b"--gpu-architecture=compute_61", str.encode(f"--include-path={cuda_include_path}")]
 
     if debug:
         opts.extend([b"--device-debug", b"--generate-line-info"])

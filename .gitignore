@@ -1,3 +1,4 @@
 ﻿__pycache__
 .ssh/config
 .ssh/*.pub
+*.egg-info

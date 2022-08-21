@@ -32,7 +32,7 @@ class Affine(ImageOperation):
     
 
     def __get_module_path(self) -> str:
-        return f"cuImageOps/operations/{self.__get_kernel_name()}/{self.__get_kernel_name()}.cu"
+        return os.path.join(os.path.dirname(cuImageOps.__file__), "operations", self.__get_kernel_name(), f"{self.__get_kernel_name()}.cu")
 
     def __get_kernel_name(self) -> str:
         return "affine"
