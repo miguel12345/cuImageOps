@@ -1,7 +1,7 @@
 #include "utils.cu"
 
 extern "C" __global__ 
-void rotate(float* image,float* out, float theta, float* _pivot, unsigned int* dims, unsigned int fillMode,unsigned int interpolationMode)
+void rotate(float* output, float* input, float theta, float* _pivot, unsigned int* dims, unsigned int fillMode,unsigned int interpolationMode)
 {
  size_t dstx = blockIdx.x * blockDim.x + threadIdx.x;
  size_t dsty = blockIdx.y * blockDim.y + threadIdx.y;
@@ -21,6 +21,6 @@ void rotate(float* image,float* out, float theta, float* _pivot, unsigned int* d
 
   size_t outIdx = dsty*width + dstx;
 
-  sampleAndAssign(image,out,srcPoint,outIdx,dims,fillMode,interpolationMode);
+  sampleAndAssign(input,output,srcPoint,outIdx,dims,fillMode,interpolationMode);
   
 }

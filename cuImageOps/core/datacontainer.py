@@ -2,8 +2,6 @@ from typing import Any, Tuple
 from cuda import cuda
 import numpy as np
 
-from cuImageOps.utils.cuda import check_error
-
 class DataContainer():
     def __init__(self, hostBuffer: np.array, stream: any) -> None:
         self.deviceBuffer = None
@@ -14,7 +12,7 @@ class DataContainer():
         self.deviceBufferPointer = None
 
     def gpu(self):
-
+        from cuImageOps.utils.cuda import check_error
         assert self.hostBuffer is not None
 
         bufferSize = self.hostBuffer.size * self.hostBuffer.itemsize
@@ -36,6 +34,7 @@ class DataContainer():
             return self.deviceBufferPointer.ctypes.data
 
     def cpu(self):
+        from cuImageOps.utils.cuda import check_error
 
         self.hostBuffer[:] = 0.0
 
@@ -56,6 +55,7 @@ class DataContainer():
         return self.hostBuffer
 
     def __del__(self):
+        from cuImageOps.utils.cuda import check_error
         if self.deviceBuffer is not None:
             err, = cuda.cuMemFree(self.deviceBuffer)
             check_error(err)

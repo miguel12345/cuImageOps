@@ -58,3 +58,13 @@ def test_gaussianblur_invalid_kernel_size_negative(square_image_grayscale,defaul
         op = GaussianBlur(kernelSize=-3,sigma=10.0,fillMode=FillMode.REFLECTION,stream=default_stream)
         op.run(square_image_grayscale).cpu().numpy()
 
+def test_gaussianblur_separable_same_results(square_image_grayscale,default_stream):
+
+    #Gaussian blur supports an implementation based on separable filters. We need to ensure the results are the same as the non-separable path
+    nonSeparableOp = GaussianBlur(kernelSize=5,sigma=10.0,useSeparableFilter=False,fillMode=FillMode.CONSTANT,stream=default_stream)
+    separableOp = GaussianBlur(kernelSize=5,sigma=10.0,useSeparableFilter=True,fillMode=FillMode.CONSTANT,stream=default_stream)
+
+    nonSeparableResult = nonSeparableOp.run(square_image_grayscale).cpu().numpy()
+    separableOp = separableOp.run(square_image_grayscale).cpu().numpy()
+
+    assert np.allclose(nonSeparableResult,separableOp)

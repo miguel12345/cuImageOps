@@ -1,7 +1,7 @@
 #include "utils.cu"
 
 extern "C" __global__ 
-void affine(float* image,float* out, float* matrix, unsigned int* dims, unsigned int fillMode, unsigned int interpolationMode)
+void affine(float* output, float* image, float* matrix, unsigned int* dims, unsigned int fillMode, unsigned int interpolationMode)
 {
  size_t dstx = blockIdx.x * blockDim.x + threadIdx.x;
  size_t dsty = blockIdx.y * blockDim.y + threadIdx.y;
@@ -20,6 +20,6 @@ void affine(float* image,float* out, float* matrix, unsigned int* dims, unsigned
 
   size_t outIdx = dsty*width + dstx;
 
-  sampleAndAssign(image,out,make_float2(srcx,srcy),outIdx,dims,fillMode,interpolationMode);
+  sampleAndAssign(image,output,make_float2(srcx,srcy),outIdx,dims,fillMode,interpolationMode);
   
 }

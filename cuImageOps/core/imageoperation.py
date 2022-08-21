@@ -35,18 +35,3 @@ class ImageOperation(Operation):
 
         return (numBlocksX,numBlocksY,1),(numThreads,numThreads,1)
 
-    def run(self,input:np.array) -> DataContainer:
-
-        input = input.astype(np.float32)
-        
-        inputShape = input.shape
-
-        if len(input.shape) <= 2:
-            inputShape = (*inputShape,1)
-
-        self.input = input
-        self.output = np.zeros_like(self.input,dtype=np.float32)
-        self.dims = np.array(inputShape,dtype=np.uint32)
-
-        return super()._Operation__run()
-

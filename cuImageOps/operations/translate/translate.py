@@ -1,6 +1,9 @@
 from typing import List, Tuple
+from cuImageOps.core.datacontainer import DataContainer
 from cuImageOps.core.imageoperation import FillMode, ImageOperation, InterpolationMode
 import numpy as np
+
+from cuImageOps.utils.cuda import compile_module, copy_data_to_device, get_kernel, get_kernel_launch_dims, run_kernel
 
 class Translate(ImageOperation):
 
@@ -18,14 +21,36 @@ class Translate(ImageOperation):
     def translate(self,t):
         self._translate = t
 
-    def _Operation__get_kernel(self) -> str:
-        return open("cuImageOps/operations/translate/translate.cu").read()
+    def __get_module_path(self) -> str:
+        return "cuImageOps/operations/translate/translate.cu"
 
-    def _Operation__get_kernel_name(self) -> str:
+    def __get_kernel_name(self) -> str:
         return "translate"
 
-    def _get_kernel_arguments(self)-> List[np.array]:
-        return [self.input,np.array([*self._translate],dtype=np.float32),self.output,self.dims,self.fillMode,self.interpolationMode]
+    def run(self,imageInput:np.array) -> DataContainer:
 
-    def _Operation__get_kernel_out_idx(self) -> int:
-        return 2
+        imageInput = imageInput.astype(np.float32)
+        
+        inputShape = imageInput.shape
+
+        if len(imageInput.shape) <= 2:
+            inputShape = (*inputShape,1)
+
+        self.input = imageInput
+        self.output = np.zeros_like(self.input,dtype=np.float32)
+        self.dims = np.array(inputShape,dtype=np.uint32)
+
+        if self.module is None:
+            self.module = compile_module(self.__get_module_path(),debug=True)
+            self.kernel = get_kernel(self.module,self.__get_kernel_name())
+
+        kernelArguments = [self.output,self.input,np.array([*self._translate],dtype=np.float32),self.dims,self.fillMode,self.interpolationMode]
+
+        dataContainers = copy_data_to_device(kernelArguments,self.stream)
+
+        blocks, threads = get_kernel_launch_dims(self.input)
+
+        run_kernel(self.kernel,blocks,threads,dataContainers,self.stream)
+
+        #Output is at index 0
+        return dataContainers[0]

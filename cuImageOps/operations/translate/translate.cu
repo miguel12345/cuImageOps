@@ -1,7 +1,7 @@
 #include "utils.cu"
 
 extern "C" __global__ 
-void translate(float* image, float* translate, float* out, unsigned int* dims, unsigned int fillMode,unsigned int interpolationMode)
+void translate(float* output, float* input, float* translate, unsigned int* dims, unsigned int fillMode,unsigned int interpolationMode)
 {
  size_t dstx = blockIdx.x * blockDim.x + threadIdx.x;
  size_t dsty = blockIdx.y * blockDim.y + threadIdx.y;
@@ -18,6 +18,6 @@ void translate(float* image, float* translate, float* out, unsigned int* dims, u
 
   size_t outIdx = dsty*width + dstx;
 
-  sampleAndAssign(image,out,make_float2(srcx,srcy),outIdx,dims,fillMode,interpolationMode);
+  sampleAndAssign(input,output,make_float2(srcx,srcy),outIdx,dims,fillMode,interpolationMode);
   
 }

@@ -1,7 +1,7 @@
 #include "utils.cu"
 
 extern "C" __global__ 
-void scale(float* image,float* out, float* scale, float* pivot, unsigned int* dims, unsigned int fillMode, unsigned int interpolationMode)
+void scale(float* output, float* input, float* scale, float* pivot, unsigned int* dims, unsigned int fillMode, unsigned int interpolationMode)
 {
  size_t dstx = blockIdx.x * blockDim.x + threadIdx.x;
  size_t dsty = blockIdx.y * blockDim.y + threadIdx.y;
@@ -22,6 +22,6 @@ void scale(float* image,float* out, float* scale, float* pivot, unsigned int* di
 
   size_t outIdx = dsty*width + dstx;
 
-  sampleAndAssign(image,out,make_float2(srcx,srcy),outIdx,dims,fillMode,interpolationMode);
+  sampleAndAssign(input,output,make_float2(srcx,srcy),outIdx,dims,fillMode,interpolationMode);
   
 }
