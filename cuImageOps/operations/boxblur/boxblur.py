@@ -52,10 +52,9 @@ class BoxBlur(ImageOperation):
         )
 
     def __compute_2d_convolution_kernel(self) -> np.array:
-        effective_kernel_size = self.kernel_size - 1
         weights_1d = np.expand_dims(
             np.array(
-                [1] * effective_kernel_size,
+                [1] * self.kernel_size,
                 dtype=np.float32,
             ),
             -1,
@@ -66,10 +65,9 @@ class BoxBlur(ImageOperation):
         return kernel_weights
 
     def __compute_1d_convolution_kernel(self) -> np.array:
-        effective_kernel_size = self.kernel_size - 1
         weights_1d = np.expand_dims(
             np.array(
-                [1] * effective_kernel_size,
+                [1] * self.kernel_size,
                 dtype=np.float32,
             ),
             -1,

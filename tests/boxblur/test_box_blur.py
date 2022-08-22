@@ -18,38 +18,48 @@ def square_image_grayscale():
     )
 
 
-def test_gaussianblur_kernel_size_1(square_image_grayscale, default_stream):
+def test_boxblur_kernel_size_3(square_image_grayscale, default_stream):
 
-    # If we use a gaussian blur with kernel size 1, it should output the same values as the input
-    op = BoxBlur(kernel_size=1, fillMode=FillMode.REFLECTION, stream=default_stream)
-
+    op = BoxBlur(
+        kernel_size=3,
+        use_separable_filter=False,
+        fillMode=FillMode.CONSTANT,
+        stream=default_stream,
+    )
     result = op.run(square_image_grayscale).cpu().numpy()
 
-    assert np.allclose(result, square_image_grayscale)
+    expected_result = np.array(
+        [
+            [1.1111112, 1.5555556, 1.7777778, 1.5555556, 1.1111112],
+            [1.5555556, 2.2222223, 2.4444447, 2.2222223, 1.5555556],
+            [1.7777778, 2.4444447, 2.888889, 2.4444447, 1.7777778],
+            [1.5555556, 2.2222223, 2.4444447, 2.2222223, 1.5555556],
+            [1.1111112, 1.5555556, 1.7777778, 1.5555556, 1.1111112],
+        ],
+        dtype=np.float32,
+    )
+
+    assert np.allclose(result, expected_result)
 
 
-def test_gaussianblur_invalid_kernel_size_even(square_image_grayscale, default_stream):
+def test_boxblur_invalid_kernel_size_even(square_image_grayscale, default_stream):
 
     with pytest.raises(ValueError):
 
         op = BoxBlur(
             kernel_size=2,
-            sigma=10.0,
             fillMode=FillMode.REFLECTION,
             stream=default_stream,
         )
         op.run(square_image_grayscale).cpu().numpy()
 
 
-def test_gaussianblur_invalid_kernel_size_negative(
-    square_image_grayscale, default_stream
-):
+def test_boxblur_invalid_kernel_size_negative(square_image_grayscale, default_stream):
 
     with pytest.raises(ValueError):
 
         op = BoxBlur(
             kernel_size=-3,
-            sigma=10.0,
             fillMode=FillMode.REFLECTION,
             stream=default_stream,
         )
