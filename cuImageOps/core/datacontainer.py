@@ -17,12 +17,12 @@ class DataContainer:
 
         assert self.hostBuffer is not None
 
-        bufferSize = self.hostBuffer.size * self.hostBuffer.itemsize
-        err, self.deviceBuffer = cuda.cuMemAlloc(bufferSize)
+        buffer_size = self.hostBuffer.size * self.hostBuffer.itemsize
+        err, self.deviceBuffer = cuda.cuMemAlloc(buffer_size)
         check_error(err)
 
         (err,) = cuda.cuMemcpyHtoDAsync(
-            self.deviceBuffer, self.hostBuffer.ctypes.data, bufferSize, self.stream
+            self.deviceBuffer, self.hostBuffer.ctypes.data, buffer_size, self.stream
         )
 
         check_error(err)

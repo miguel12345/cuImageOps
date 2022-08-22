@@ -71,6 +71,14 @@ class Affine(ImageOperation):
         ]
 
     def run(self, image_input: np.array) -> DataContainer:
+        """Runs the operation on an image and returns the data container for the result
+
+        Args:
+            image_input (np.array): Input image to be processed
+
+        Returns:
+            DataContainer: Result of the operation. Can be transfered to cpu using cpu()
+        """
 
         image_input = image_input.astype(np.float32)
 

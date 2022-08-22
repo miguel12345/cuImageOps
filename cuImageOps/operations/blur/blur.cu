@@ -54,7 +54,7 @@ template<typename type> __device__ void kernelSampleAndAssign(type* input, type*
 }
 
 extern "C" __global__ 
-void gaussianblur(float* output, float* input, float* kernel, unsigned int kernelSize, unsigned int* dims, unsigned int fillMode,unsigned int interpolationMode)
+void blur(float* output, float* input, float* kernel, unsigned int kernelSize, unsigned int* dims, unsigned int fillMode,unsigned int interpolationMode)
 {
   size_t dstx = blockIdx.x * blockDim.x + threadIdx.x;
   size_t dsty = blockIdx.y * blockDim.y + threadIdx.y;
@@ -91,7 +91,7 @@ void gaussianblur(float* output, float* input, float* kernel, unsigned int kerne
   
 }
 
-extern "C" __global__ void gaussianblurHorizontal(float* output,float* input, float* kernel, unsigned int kernelSize, unsigned int* dims, unsigned int fillMode,unsigned int interpolationMode)
+extern "C" __global__ void blurHorizontal(float* output,float* input, float* kernel, unsigned int kernelSize, unsigned int* dims, unsigned int fillMode,unsigned int interpolationMode)
 {
   size_t dstx = blockIdx.x * blockDim.x + threadIdx.x;
   size_t dsty = blockIdx.y * blockDim.y + threadIdx.y;
@@ -127,7 +127,7 @@ extern "C" __global__ void gaussianblurHorizontal(float* output,float* input, fl
   }
 }
 
-extern "C" __global__ void gaussianblurVertical(float* output,float* input, float* kernel, unsigned int kernelSize, unsigned int* dims, unsigned int fillMode,unsigned int interpolationMode)
+extern "C" __global__ void blurVertical(float* output,float* input, float* kernel, unsigned int kernelSize, unsigned int* dims, unsigned int fillMode,unsigned int interpolationMode)
 {
   size_t dstx = blockIdx.x * blockDim.x + threadIdx.x;
   size_t dsty = blockIdx.y * blockDim.y + threadIdx.y;

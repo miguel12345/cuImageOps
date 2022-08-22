@@ -3,12 +3,12 @@ from .operation import Operation
 
 
 class FillMode(IntEnum):
-    CONSTANT = (1,)
+    CONSTANT = 1
     REFLECTION = 2
 
 
 class InterpolationMode(IntEnum):
-    POINT = (1,)
+    POINT = 1
     LINEAR = 2
 
 

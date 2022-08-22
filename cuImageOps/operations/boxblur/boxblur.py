@@ -4,24 +4,21 @@ import cuImageOps
 from cuImageOps.core.datacontainer import DataContainer
 from cuImageOps.core.imageoperation import FillMode, ImageOperation, InterpolationMode
 import cuImageOps.utils.cuda as cuda_utils
-from cuImageOps.utils.utils import gaussian
 
 
-class GaussianBlur(ImageOperation):
+class BoxBlur(ImageOperation):
     def __init__(
         self,
         kernel_size: int,
-        sigma: float,
         use_separable_filter: bool = False,
         fillMode: FillMode = FillMode.CONSTANT,
         interpolation_mode: InterpolationMode = InterpolationMode.POINT,
         **kwargs
     ) -> None:
-        """Instantiates a gaussian blur operation
+        """Instantiates a box blur operation
 
         Args:
             kernel_size (int): Kernel size. Must be a positive odd number
-            sigma (float): The sigma value used to calculate the kernel weights. Higher values produce blurrier images
             use_separable_filter (bool, optional): Whether to use separable filters, improving performance on larger kernel sizes. Defaults to False.
             fillMode (FillMode, optional): Policy for sampling pixels outside the frame. Defaults to FillMode.CONSTANT.
             interpolation_mode (InterpolationMode, optional): Interpolation mode, can be point or linear. Defaults to InterpolationMode.POINT.
@@ -32,13 +29,12 @@ class GaussianBlur(ImageOperation):
         super().__init__(**kwargs)
 
         if kernel_size % 2 == 0:
-            raise ValueError("Gaussian blur only accepts odd kernel sizes")
+            raise ValueError("Box blur only accepts odd kernel sizes")
 
-        if kernel_size < 0:
-            raise ValueError("Gaussian blur only positive kernel sizes")
+        if kernel_size < 2:
+            raise ValueError("Box blur only accepts kernel sizes greater than one")
 
         self.kernel_size = kernel_size
-        self.sigma = sigma
         self.fill_mode = fillMode
         self.interpolation_mode = interpolation_mode
         self.use_separable_filter = use_separable_filter
@@ -57,37 +53,30 @@ class GaussianBlur(ImageOperation):
 
     def __compute_2d_convolution_kernel(self) -> np.array:
         effective_kernel_size = self.kernel_size - 1
-        gaussian1d = np.expand_dims(
+        weights_1d = np.expand_dims(
             np.array(
-                [
-                    gaussian(x, self.sigma)
-                    for x in range(
-                        int(-effective_kernel_size / 2),
-                        int(effective_kernel_size / 2) + 1,
-                    )
-                ],
+                [1] * effective_kernel_size,
                 dtype=np.float32,
             ),
             -1,
         )
-        gaussian_kernel = np.matmul(gaussian1d, gaussian1d.T)
+        kernel_weights = np.matmul(weights_1d, weights_1d.T)
         # Renormalize kernel
-        gaussian_kernel /= gaussian_kernel.sum()
-        return gaussian_kernel
+        kernel_weights /= kernel_weights.sum()
+        return kernel_weights
 
     def __compute_1d_convolution_kernel(self) -> np.array:
         effective_kernel_size = self.kernel_size - 1
-        gaussian_kernel_1d = np.array(
-            [
-                gaussian(x, self.sigma)
-                for x in range(
-                    int(-effective_kernel_size / 2), int(effective_kernel_size / 2) + 1
-                )
-            ],
-            dtype=np.float32,
+        weights_1d = np.expand_dims(
+            np.array(
+                [1] * effective_kernel_size,
+                dtype=np.float32,
+            ),
+            -1,
         )
-        gaussian_kernel_1d /= gaussian_kernel_1d.sum()
-        return gaussian_kernel_1d
+        # Renormalize kernel
+        weights_1d /= weights_1d.sum()
+        return weights_1d
 
     def run(self, image_input: np.array) -> DataContainer:
         """Runs the operation on an image and returns the data container for the result
