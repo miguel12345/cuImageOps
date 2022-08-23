@@ -38,8 +38,6 @@ class DataContainer:
     def cpu(self):
         from cuImageOps.utils.cuda import check_error
 
-        self.hostBuffer[:] = 0.0
-
         # Copy data from device to host
         (err,) = cuda.cuMemcpyDtoHAsync(
             self.hostBuffer.ctypes.data,
