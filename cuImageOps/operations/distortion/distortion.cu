@@ -23,7 +23,7 @@ void distortion(float* output, float* image, float k1, float k2, float k3, float
 
   float xcn_d = (xcn * (1 + k1*(r_2) + k2*r_4 + k3*r_6)) + 2*p1*xcn*ycn + p2*(r_2 + 2*(xcn*xcn));
   float ycn_d = (ycn * (1 + k1*(r_2) + k2*r_4 + k3*r_6)) + p1*(r_2 + 2*(ycn*ycn)) + 2*p2*xcn*ycn;
-
+  
   float srcx = (xcn_d + 0.5f) * width;
   float srcy = (ycn_d + 0.5f) * height;
 

@@ -15,14 +15,15 @@ class Operation(ABC):
         self.data_containers: List[DataContainer] = []
         self.module = None
         self.kernel = None
-        self.stream = stream.stream
 
-        if self.stream is None:
+        if stream is None:
 
             if Operation._defaultStream is None:
                 Operation._defaultStream = CudaStream()
 
-            self.stream = Operation._defaultStream
+            self.stream = Operation._defaultStream.stream
+        else:
+            self.stream = stream.stream
 
     def __del__(self):
         if self.module is not None:

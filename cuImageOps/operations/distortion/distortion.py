@@ -69,8 +69,8 @@ class Distortion(ImageOperation):
             self.kernel = cuda_utils.get_kernel(self.module, self.__get_kernel_name())
 
         kernel_arguments = [
-            self.input,
             self.output,
+            self.input,
             np.array(self.k1, dtype=np.float32),
             np.array(self.k2, dtype=np.float32),
             np.array(self.k3, dtype=np.float32),
