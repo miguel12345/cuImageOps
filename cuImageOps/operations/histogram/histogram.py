@@ -41,6 +41,10 @@ class Histogram(ImageOperation):
 
         input_shape = image_input.shape
         self.input = image_input
+        num_channels = 1
+
+        if len(input_shape) >= 3:
+            num_channels = input_shape[2]
 
         blocks = (10, 10, 1)
         threads = (16, 16, 1)
@@ -69,6 +73,7 @@ class Histogram(ImageOperation):
             num_partial_histograms_dc,
             input_dc,
             dims_dc,
+            num_channels_dc,
         ) = cuda_utils.copy_data_to_device(
             [
                 self.partial_histograms,
@@ -76,6 +81,7 @@ class Histogram(ImageOperation):
                 np.array(num_partial_histograms, np.uint32),
                 self.input,
                 self.dims,
+                np.array(num_channels, np.uint8),
             ],
             self.stream,
         )
@@ -85,7 +91,7 @@ class Histogram(ImageOperation):
             self.partial_histogram_kernel,
             blocks,
             threads,
-            [partial_histograms_dc, input_dc, dims_dc],
+            [partial_histograms_dc, input_dc, dims_dc, num_channels_dc],
             self.stream,
         )
 
@@ -94,7 +100,12 @@ class Histogram(ImageOperation):
             self.global_histogram_kernel,
             (num_partial_histograms, 1, 1),
             (self.num_bins, 1, 1),
-            [global_histogram_dc, partial_histograms_dc, num_partial_histograms_dc],
+            [
+                global_histogram_dc,
+                partial_histograms_dc,
+                num_partial_histograms_dc,
+                num_channels_dc,
+            ],
             self.stream,
         )
 

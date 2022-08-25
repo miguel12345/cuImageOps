@@ -2,7 +2,7 @@
 
 #define NUM_BINS 255
 
-extern "C" __global__ void partial_histogram(unsigned int* partial_histograms,const unsigned char* input_image, unsigned int* input_image_dims)
+template<unsigned char num_channels> __device__ void _partial_histogram(unsigned int* partial_histograms,const unsigned char* input_image, const unsigned int* input_image_dims)
 {
 
   size_t thread_global_x = blockIdx.x * blockDim.x + threadIdx.x;
@@ -25,18 +25,23 @@ extern "C" __global__ void partial_histogram(unsigned int* partial_histograms,co
   // linear block index within 2D grid
   unsigned int global_block_index = blockIdx.x + blockIdx.y * gridDim.x;
 
-  __shared__ unsigned int smem[NUM_BINS];
-  for (int i = block_thread_idx; i < NUM_BINS; i += num_threads_in_block) smem[i] = 0;
+  __shared__ unsigned int smem[NUM_BINS * num_channels];
+  for (int i = block_thread_idx * num_channels; i < NUM_BINS; i += num_threads_in_block) {
+    for (int c = 0; c < num_channels; c += 1) {
+      smem[i + c] = 0;
+    }
+  }
   __syncthreads();
 
   for (size_t x = thread_global_x; x < input_image_width; x += num_global_threads_x) {
     for (size_t y = thread_global_y; y < input_image_height; y += num_global_threads_y) { 
+      for (int c = 0; c < num_channels; c += 1) {
+          //Sample image and convert float to uint
+          unsigned char val = input_image[(y*input_image_width + x)*num_channels + c];
 
-      //Sample image and convert float to uint
-      unsigned char val = input_image[y*input_image_width + x];
-
-      //Increment the counter for val
-      atomicAdd(&smem[val], 1);
+          //Increment the counter for val
+          atomicAdd(&smem[val*num_channels + c], 1);
+      }
     }
 }
 
@@ -51,15 +56,28 @@ extern "C" __global__ void partial_histogram(unsigned int* partial_histograms,co
 
 }
 
-extern "C" __global__ void global_histogram(unsigned int* global_histogram,unsigned int* partial_histograms, unsigned int num_partial_histograms){
+extern "C" __global__ void partial_histogram(unsigned int* partial_histograms,const unsigned char* input_image, const unsigned int* input_image_dims, unsigned char num_channels) {
+
+  if(num_channels == 1){
+    _partial_histogram<1>(partial_histograms,input_image,input_image_dims);
+  }
+  else if(num_channels == 3){
+    _partial_histogram<3>(partial_histograms,input_image,input_image_dims);
+  }
+
+}
+
+extern "C" __global__ void global_histogram(unsigned int* global_histogram,unsigned int* partial_histograms, unsigned int num_partial_histograms, unsigned char num_channels){
 
     unsigned int global_thread_idx = blockIdx.x * blockDim.x + threadIdx.x;
 
-    if(global_thread_idx >= (num_partial_histograms* NUM_BINS))
+    if(global_thread_idx >= (num_partial_histograms* NUM_BINS * num_channels))
       return;
 
     for(unsigned int i = 0; i < num_partial_histograms; i++ ){
-      global_histogram[global_thread_idx] += partial_histograms[i * NUM_BINS + global_thread_idx];
+      for (int c = 0; c < num_channels; c += 1) {
+        global_histogram[global_thread_idx] += partial_histograms[i * NUM_BINS + global_thread_idx*num_channels + c];
+      }
     }
 
 

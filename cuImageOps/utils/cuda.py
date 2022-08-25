@@ -39,7 +39,7 @@ def compile_module(module_path, debug=True):
 
     if debug:
         opts.extend([b"--device-debug", b"--generate-line-info"])
-    (err,) = nvrtc.nvrtcCompileProgram(prog, len(opts), opts)
+    (compile_err,) = nvrtc.nvrtcCompileProgram(prog, len(opts), opts)
     # Check for warnings in the compilation log, and fail if any
 
     err, log_size = nvrtc.nvrtcGetProgramLogSize(prog)
@@ -47,7 +47,7 @@ def compile_module(module_path, debug=True):
     nvrtc.nvrtcGetProgramLog(prog, compile_log)
     compile_log = compile_log.decode()
 
-    if err != nvrtc.nvrtcResult.NVRTC_SUCCESS:
+    if compile_err != nvrtc.nvrtcResult.NVRTC_SUCCESS:
         raise RuntimeError(f"Nvrtc Compile error: {compile_log}")
     if "warning" in compile_log:
         raise RuntimeError(
