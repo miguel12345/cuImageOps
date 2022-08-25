@@ -8,7 +8,6 @@ void rotate(float* output, float* input, float theta, float* _pivot, unsigned in
 
  unsigned int height = dims[0];
  unsigned int width = dims[1];
- unsigned int channels = dims[2];
 
  float2 point = make_float2(float(dstx),float(dsty));
  float2 pivot = make_float2(_pivot[0]* (width-1),_pivot[1]* (height-1));

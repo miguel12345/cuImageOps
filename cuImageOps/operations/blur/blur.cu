@@ -9,7 +9,6 @@ template<typename type> __device__ void kernelSampleAndAssign(type* input, type*
   int halfKernelSize = (kernelSize-1)/2;
   unsigned int kernelCellIdx = 0;
 
-  unsigned int height = dims[0];  
   unsigned int width = dims[1];
 
   unsigned int outputIdx = dstPoint.y*width + dstPoint.x;

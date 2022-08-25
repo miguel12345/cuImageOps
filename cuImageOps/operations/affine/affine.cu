@@ -8,7 +8,6 @@ void affine(float* output, float* image, float* matrix, unsigned int* dims, unsi
 
  unsigned int height = dims[0];
  unsigned int width = dims[1];
- unsigned int channels = dims[2];
 
  // multiply matrix by point
  float srcx = matrix[0]* dstx + matrix[1]* dsty + matrix[2];

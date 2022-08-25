@@ -11,7 +11,6 @@ void translate(float* output, float* input, float* translate, unsigned int* dims
 
  unsigned int height = dims[0];
  unsigned int width = dims[1];
- unsigned int channels = dims[2];
 
  if (dstx >= width || dsty >= height)
     return;

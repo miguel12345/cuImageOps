@@ -8,7 +8,6 @@ void scale(float* output, float* input, float* scale, float* pivot, unsigned int
 
  unsigned int height = dims[0];
  unsigned int width = dims[1];
- unsigned int channels = dims[2];
 
  float pivotx = pivot[0] * (width-1);
  float pivoty = pivot[1] * (height-1);
