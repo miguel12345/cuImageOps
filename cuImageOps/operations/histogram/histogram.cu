@@ -26,7 +26,7 @@ template<unsigned char num_channels> __device__ void _partial_histogram(unsigned
   unsigned int global_block_index = blockIdx.x + blockIdx.y * gridDim.x;
 
   __shared__ unsigned int smem[NUM_BINS * num_channels];
-  for (int i = block_thread_idx * num_channels; i < NUM_BINS; i += num_threads_in_block) {
+  for (int i = block_thread_idx * num_channels; i < NUM_BINS * num_channels; i += num_threads_in_block * num_channels) {
     for (int c = 0; c < num_channels; c += 1) {
       smem[i + c] = 0;
     }
