@@ -6,3 +6,6 @@ from .scale.scale import Scale as Scale
 from .rotate.rotate import Rotate as Rotate
 from .translate.translate import Translate as Translate
 from .histogram.histogram import Histogram as Histogram
+from .histogramequalization.histogramequalization import (
+    HistogramEqualization as HistogramEqualization,
+)

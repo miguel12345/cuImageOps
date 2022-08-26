@@ -21,6 +21,13 @@ class Histogram(ImageOperation):
         self.global_histogram = None
         self.num_bins = 256
 
+        self.partial_histograms_dc = None
+        self.global_histogram_dc = None
+        self.num_partial_histograms_dc = None
+        self.input_dc = None
+        self.dims_dc = None
+        self.num_channels_dc = None
+
     def __get_module_path(self) -> str:
         return os.path.join(
             os.path.dirname(cuImageOps.__file__),
@@ -46,6 +53,9 @@ class Histogram(ImageOperation):
         if len(input_shape) >= 3:
             num_channels = input_shape[2]
 
+        if len(image_input.shape) <= 2:
+            input_shape = (*input_shape, 1)
+
         blocks = (10, 10, 1)
         threads = (16, 16, 1)
         num_partial_histograms = blocks[0] * blocks[1]
@@ -68,12 +78,12 @@ class Histogram(ImageOperation):
             )
 
         (
-            partial_histograms_dc,
-            global_histogram_dc,
-            num_partial_histograms_dc,
-            input_dc,
-            dims_dc,
-            num_channels_dc,
+            self.partial_histograms_dc,
+            self.global_histogram_dc,
+            self.num_partial_histograms_dc,
+            self.input_dc,
+            self.dims_dc,
+            self.num_channels_dc,
         ) = cuda_utils.copy_data_to_device(
             [
                 self.partial_histograms,
@@ -91,7 +101,12 @@ class Histogram(ImageOperation):
             self.partial_histogram_kernel,
             blocks,
             threads,
-            [partial_histograms_dc, input_dc, dims_dc, num_channels_dc],
+            [
+                self.partial_histograms_dc,
+                self.input_dc,
+                self.dims_dc,
+                self.num_channels_dc,
+            ],
             self.stream,
         )
 
@@ -101,12 +116,12 @@ class Histogram(ImageOperation):
             (num_partial_histograms, 1, 1),
             (self.num_bins, 1, 1),
             [
-                global_histogram_dc,
-                partial_histograms_dc,
-                num_partial_histograms_dc,
-                num_channels_dc,
+                self.global_histogram_dc,
+                self.partial_histograms_dc,
+                self.num_partial_histograms_dc,
+                self.num_channels_dc,
             ],
             self.stream,
         )
 
-        return global_histogram_dc
+        return self.global_histogram_dc
