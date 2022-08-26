@@ -129,12 +129,46 @@ def test_histogram_values_for_small_image_rgb(square_image_rgb, default_stream):
 
     op = Histogram(stream=default_stream)
 
-    r_histogram = np.histogram(square_image_rgb[:, :, 0], 256, (0, 256))[0]
-    g_histogram = np.histogram(square_image_rgb[:, :, 1], 256, (0, 256))[0]
-    b_histogram = np.histogram(square_image_rgb[:, :, 2], 256, (0, 256))[0]
+    r_histogram = np.histogram(square_image_rgb[:, :, 0], 256, (0, 255))[0]
+    g_histogram = np.histogram(square_image_rgb[:, :, 1], 256, (0, 255))[0]
+    b_histogram = np.histogram(square_image_rgb[:, :, 2], 256, (0, 255))[0]
 
     histograms = np.stack([r_histogram, g_histogram, b_histogram], axis=1)
 
     result = op.run(square_image_rgb).cpu().numpy()
+
+    assert np.array_equal(result, histograms)
+
+
+def test_histogram_values_for_very_large_image_rgb(square_image_rgb, default_stream):
+
+    op = Histogram(stream=default_stream)
+
+    medium_square_image_rgb = np.tile(square_image_rgb, (1000, 1000, 1))
+
+    r_histogram = np.histogram(medium_square_image_rgb[:, :, 0], 256, (0, 255))[0]
+    g_histogram = np.histogram(medium_square_image_rgb[:, :, 1], 256, (0, 255))[0]
+    b_histogram = np.histogram(medium_square_image_rgb[:, :, 2], 256, (0, 255))[0]
+
+    histograms = np.stack([r_histogram, g_histogram, b_histogram], axis=1)
+
+    result = op.run(medium_square_image_rgb).cpu().numpy()
+
+    assert np.array_equal(result, histograms)
+
+
+def test_histogram_values_for_very_large_image_rgb(square_image_rgb, default_stream):
+
+    op = Histogram(stream=default_stream)
+
+    medium_square_image_rgb = np.tile(square_image_rgb, (1000, 1000, 1))
+
+    r_histogram = np.histogram(medium_square_image_rgb[:, :, 0], 256, (0, 255))[0]
+    g_histogram = np.histogram(medium_square_image_rgb[:, :, 1], 256, (0, 255))[0]
+    b_histogram = np.histogram(medium_square_image_rgb[:, :, 2], 256, (0, 255))[0]
+
+    histograms = np.stack([r_histogram, g_histogram, b_histogram], axis=1)
+
+    result = op.run(medium_square_image_rgb).cpu().numpy()
 
     assert np.array_equal(result, histograms)

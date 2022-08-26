@@ -79,7 +79,7 @@ extern "C" __global__ void global_histogram(unsigned int* global_histogram,unsig
 
     for(unsigned int i = 0; i < num_partial_histograms; i++ ){
       for (int c = 0; c < num_channels; c += 1) {
-        global_histogram[global_thread_idx*num_channels + c] += partial_histograms[i * NUM_BINS + global_thread_idx*num_channels + c];
+        global_histogram[global_thread_idx*num_channels + c] += partial_histograms[i * NUM_BINS* num_channels + global_thread_idx*num_channels + c];
       }
     }
 
