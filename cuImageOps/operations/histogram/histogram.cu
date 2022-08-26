@@ -1,6 +1,6 @@
 #include "utils.cu"
 
-#define NUM_BINS 255
+#define NUM_BINS 256
 
 template<unsigned char num_channels> __device__ void _partial_histogram(unsigned int* partial_histograms,const unsigned char* input_image, const unsigned int* input_image_dims)
 {
@@ -48,10 +48,13 @@ template<unsigned char num_channels> __device__ void _partial_histogram(unsigned
   __syncthreads();
 
   //Write block counters to output
-  unsigned int* block_partial_histogram = partial_histograms + (global_block_index * NUM_BINS);
+  unsigned int* block_partial_histogram = partial_histograms + (global_block_index * NUM_BINS * num_channels);
 
-  for (unsigned int i = block_thread_idx; i < NUM_BINS; i += num_threads_in_block) {
-    block_partial_histogram[i] = smem[i];
+
+  for (unsigned int i = block_thread_idx; i < NUM_BINS ; i += num_threads_in_block) {
+    for (int c = 0; c < num_channels; c += 1) {
+      block_partial_histogram[i * num_channels + c] = smem[i * num_channels + c];
+    }
   }
 
 }
@@ -76,7 +79,7 @@ extern "C" __global__ void global_histogram(unsigned int* global_histogram,unsig
 
     for(unsigned int i = 0; i < num_partial_histograms; i++ ){
       for (int c = 0; c < num_channels; c += 1) {
-        global_histogram[global_thread_idx] += partial_histograms[i * NUM_BINS + global_thread_idx*num_channels + c];
+        global_histogram[global_thread_idx*num_channels + c] += partial_histograms[i * NUM_BINS + global_thread_idx*num_channels + c];
       }
     }
 

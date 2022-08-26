@@ -19,7 +19,7 @@ class Histogram(ImageOperation):
         self.partial_histograms = None
         # self.global_histogram contains the number of times a value exists in an image
         self.global_histogram = None
-        self.num_bins = 255
+        self.num_bins = 256
 
     def __get_module_path(self) -> str:
         return os.path.join(
@@ -50,9 +50,9 @@ class Histogram(ImageOperation):
         threads = (16, 16, 1)
         num_partial_histograms = blocks[0] * blocks[1]
         self.partial_histograms = np.zeros(
-            (num_partial_histograms, self.num_bins), dtype=np.uint32
+            (num_partial_histograms, self.num_bins, num_channels), dtype=np.uint32
         )
-        self.global_histogram = np.zeros((self.num_bins), dtype=np.uint32)
+        self.global_histogram = np.zeros((self.num_bins, num_channels), dtype=np.uint32)
 
         self.dims = np.array(input_shape, dtype=np.uint32)
 
