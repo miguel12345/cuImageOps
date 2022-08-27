@@ -40,10 +40,10 @@ extern "C" __global__ void histogram_equalization(unsigned char* output_image, u
             unsigned int cumulative_val = cumulative_distribution[level];
 
             //Normalize it
-            float normalized_cumulative_val = (float)(cumulative_val-cumulative_distribution_min[0]) / (float)(input_image_len - 1);
+            float normalized_cumulative_val = (float)(cumulative_val-cumulative_distribution_min[0]) / (float)(input_image_len-cumulative_distribution_min[0]);
 
             //Convert to uint8
-            unsigned char equalized_level = (unsigned char) (__float2uint_rn(normalized_cumulative_val * (num_bins-cumulative_distribution_min[0])));
+            unsigned char equalized_level = (unsigned char) (__float2uint_rn(normalized_cumulative_val * (num_bins-1)));
 
             output_image[(y*input_image_width + x)*num_channels + c] = equalized_level;
             

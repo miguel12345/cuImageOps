@@ -1,6 +1,8 @@
 import os
 import numpy as np
 import cuImageOps
+from cuda import cuda
+from cuImageOps.core.cuda.stream import CudaStream
 from cuImageOps.core.datacontainer import DataContainer
 from cuImageOps.core.imageoperation import FillMode, ImageOperation, InterpolationMode
 from cuImageOps.operations.histogram.histogram import Histogram
@@ -9,14 +11,14 @@ from cuImageOps.utils.utils import gaussian
 
 
 class HistogramEqualization(ImageOperation):
-    def __init__(self, **kwargs) -> None:
-        super().__init__(**kwargs)
+    def __init__(self, stream: CudaStream = None, **kwargs) -> None:
+        super().__init__(stream=stream, **kwargs)
 
         self.dims = None
         self.cumulative_distribution_kernel = None
         self.histogram_equalization_kernel = None
         self.global_histogram = None
-        self.histogram_op = Histogram()
+        self.histogram_op = Histogram(stream=stream)
         self.num_bins = self.histogram_op.num_bins
         self.cumulative_distribution = np.zeros(self.num_bins, dtype=np.uint32)
 
@@ -38,11 +40,6 @@ class HistogramEqualization(ImageOperation):
             DataContainer: Result of the operation. Can be transfered to cpu using cpu()
         """
 
-        self.histogram_op.run(image_input, debug)
-
-        input_shape = image_input.shape
-        self.input = image_input
-
         if self.module is None:
             self.module = cuda_utils.compile_module(
                 self.__get_module_path(), debug=debug
@@ -54,9 +51,6 @@ class HistogramEqualization(ImageOperation):
                 self.module, "histogram_equalization"
             )
 
-        input_dc = self.histogram_op.input_dc
-        dims_dc = self.histogram_op.dims_dc
-        global_histogram_dc = self.histogram_op.global_histogram_dc
         output = np.zeros_like(image_input, dtype=np.uint8)
         cumulative_distribution_min = 0
 
@@ -74,6 +68,12 @@ class HistogramEqualization(ImageOperation):
             ],
             self.stream,
         )
+
+        self.histogram_op.run(image_input, debug)
+
+        input_dc = self.histogram_op.input_dc
+        dims_dc = self.histogram_op.dims_dc
+        global_histogram_dc = self.histogram_op.global_histogram_dc
 
         # Calculate cumulative distribution
         cuda_utils.run_kernel(

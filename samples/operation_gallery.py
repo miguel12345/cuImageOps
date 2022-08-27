@@ -6,15 +6,23 @@ from cuImageOps.operations.affine.affine import Affine
 from cuImageOps.operations.boxblur.boxblur import BoxBlur
 from cuImageOps.operations.distortion.distortion import Distortion
 from cuImageOps.operations.gaussianblur.gaussianblur import GaussianBlur
+from cuImageOps.operations import HistogramEqualization
 
 stream = CudaStream()
 
 image = cv2.imread("/workspace/tests/data/grayscale_dog.jpg", cv2.IMREAD_UNCHANGED)
-image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
+# image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
 
 
 def draw_label(img, label):
-    return cv2.putText(img, label, (5, 20), cv2.FONT_HERSHEY_PLAIN, 1.0, (0, 0, 255))
+    return cv2.putText(
+        cv2.cvtColor(img, cv2.COLOR_GRAY2BGR),
+        label,
+        (5, 20),
+        cv2.FONT_HERSHEY_PLAIN,
+        1.0,
+        (0, 0, 255),
+    )
 
 
 results = []
@@ -75,6 +83,16 @@ results.append(
     )
 )
 
+histogram_equalization_op = HistogramEqualization(
+    stream=stream,
+)
+results.append(
+    draw_label(
+        histogram_equalization_op.run(image).cpu().numpy().astype(np.float32),
+        "Histogram equalization",
+    )
+)
+
 grid_width = 3
 rows = []
 
@@ -82,7 +100,7 @@ for i in range(0, len(results), grid_width):
     max_idx = min(len(results), i + grid_width)
     imgs_to_concat = results[i:max_idx]
     while len(imgs_to_concat) < grid_width:
-        imgs_to_concat.append(np.zeros_like(image, dtype=np.float32))
+        imgs_to_concat.append(np.zeros_like(results[0], dtype=np.float32))
 
     rows.append(cv2.hconcat(imgs_to_concat))
 

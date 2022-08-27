@@ -72,9 +72,9 @@ extern "C" __global__ void partial_histogram(unsigned int* partial_histograms,co
 
 extern "C" __global__ void global_histogram(unsigned int* global_histogram,unsigned int* partial_histograms, unsigned int num_partial_histograms, unsigned char num_channels){
 
-    unsigned int global_thread_idx = blockIdx.x * blockDim.x + threadIdx.x;
+    unsigned int global_thread_idx = threadIdx.x;
 
-    if(global_thread_idx >= (num_partial_histograms* NUM_BINS * num_channels))
+    if(global_thread_idx >= NUM_BINS)
       return;
 
     for(unsigned int i = 0; i < num_partial_histograms; i++ ){

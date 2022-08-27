@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import cuImageOps
+from cuda import cuda
 from cuImageOps.core.datacontainer import DataContainer
 from cuImageOps.core.imageoperation import FillMode, ImageOperation, InterpolationMode
 import cuImageOps.utils.cuda as cuda_utils
@@ -113,7 +114,7 @@ class Histogram(ImageOperation):
         # Run global histogram
         cuda_utils.run_kernel(
             self.global_histogram_kernel,
-            (num_partial_histograms, 1, 1),
+            (1, 1, 1),
             (self.num_bins, 1, 1),
             [
                 self.global_histogram_dc,

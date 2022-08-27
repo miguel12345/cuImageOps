@@ -8,7 +8,6 @@ void distortion(float* output, float* image, float k1, float k2, float k3, float
 
  unsigned int height = dims[0];
  unsigned int width = dims[1];
- unsigned int channels = dims[2];
 
  if (dstx >= width || dsty >= height)
     return;
