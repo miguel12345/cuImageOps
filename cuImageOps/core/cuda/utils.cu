@@ -20,6 +20,55 @@ inline __device__ float4 operator+(float4 a,float4 b) {
     return make_float4(a.x+b.x,a.y+b.y,a.z+b.z,a.w+b.w);
 }
 
+inline __device__ float3 operator*(uchar3 a,float b) {
+    return make_float3(a.x*b,a.y*b,a.z*b);
+}
+
+inline __device__ float4 operator*(uchar4 a,float b) {
+    return make_float4(a.x*b,a.y*b,a.z*b,a.w*b);
+}
+
+template<typename src_type, typename dst_type> inline __device__ dst_type convert(src_type src){
+    return src;
+}
+
+template<> inline __device__ unsigned char convert<float,unsigned char>(float src) {
+    return __float2uint_rn(src);
+}
+
+template<> inline __device__ uchar3 convert<float3,uchar3>(float3 src) {
+    return make_uchar3(__float2uint_rn(src.x),__float2uint_rn(src.y),__float2uint_rn(src.z));
+}
+
+template<> inline __device__ uchar4 convert<float4,uchar4>(float4 src) {
+    return make_uchar4(__float2uint_rn(src.x),__float2uint_rn(src.y),__float2uint_rn(src.z),__float2uint_rn(src.w));
+}
+
+template<typename type> inline __device__ type weighted_sum(type a,float wa,type b,float wb,type c,float wc,type d,float wd) {
+    return (a * wa + b * wb + c * wc + d * wd);
+}
+
+template <> inline __device__ unsigned char weighted_sum<unsigned char>(unsigned char a,float wa,unsigned char b,float wb,unsigned char c,float wc,unsigned char d,float wd) {
+    return __float2uint_rn(a * wa + b * wb + c * wc + d * wd);
+}
+
+template <> inline __device__ uchar3 weighted_sum<uchar3>(uchar3 a,float wa,uchar3 b,float wb,uchar3 c,float wc,uchar3 d,float wd) {
+    return make_uchar3(
+        __float2uint_rn(a.x * wa + b.x * wb + c.x * wc + d.x * wd),
+        __float2uint_rn(a.y * wa + b.y * wb + c.y * wc + d.y * wd),
+        __float2uint_rn(a.z * wa + b.z * wb + c.z * wc + d.z * wd)
+    );
+}
+
+template <> inline __device__ uchar4 weighted_sum<uchar4>(uchar4 a,float wa,uchar4 b,float wb,uchar4 c,float wc,uchar4 d,float wd) {
+    return make_uchar4(
+        __float2uint_rn(a.x * wa + b.x * wb + c.x * wc + d.x * wd),
+        __float2uint_rn(a.y * wa + b.y * wb + c.y * wc + d.y * wd),
+        __float2uint_rn(a.z * wa + b.z * wb + c.z * wc + d.z * wd),
+        __float2uint_rn(a.w * wa + b.w * wb + c.w * wc + d.w * wd)
+    );
+}
+
 __device__ float radians(float a)
 {
   return 0.017453292 * a;
@@ -107,8 +156,7 @@ template<typename type> __device__ type bilinearsample2d(type* image, float x, f
     float wbr = ((x-tl.x)*(y-tl.y))/area;
 
     //Return interpolated result
-    return tlval*wtl + trval*wtr + blval*wbl + brval*wbr;
-
+    return weighted_sum<type>(tlval,wtl,trval,wtr,blval,wbl,brval,wbr);
 }
 
 template<typename type> __device__ type sample2d(type* image, float x, float y, unsigned int* dims, unsigned int fillMode,unsigned int interpolationMode, type fillConstant) {
@@ -141,6 +189,26 @@ __device__ void sampleAndAssign(float* input, float* output,float2 inputPos,unsi
     }
     else{
         output[outputIndex] = sample2d<float>(input,inputPos.x,inputPos.y,dims,fillMode,interpolationMode,0.0f);
+    }
+}
+
+
+__device__ void sampleAndAssign_uchar(unsigned char* input, unsigned char* output,float2 inputPos,unsigned int outputIndex, unsigned int* dims, unsigned int fillMode, unsigned int interpolationMode) {
+    
+    unsigned int channels = dims[2];
+
+    if(channels == 4){
+        uchar4* input4c = (uchar4*)&input[0];
+        uchar4* out4c = (uchar4*)&output[0];
+        out4c[outputIndex] = sample2d<uchar4>(input4c,inputPos.x,inputPos.y,dims,fillMode,interpolationMode,make_uchar4(0,0,0,0));
+    }
+    else if(channels == 3){
+        uchar3* input3c = (uchar3*)&input[0];
+        uchar3* out3c = (uchar3*)&output[0];
+        out3c[outputIndex] = sample2d<uchar3>(input3c,inputPos.x,inputPos.y,dims,fillMode,interpolationMode,make_uchar3(0,0,0));
+    }
+    else{
+        output[outputIndex] = sample2d<unsigned char>(input,inputPos.x,inputPos.y,dims,fillMode,interpolationMode,0);
     }
 }
 

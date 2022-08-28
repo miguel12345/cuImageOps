@@ -8,7 +8,7 @@ from cuImageOps.operations.translate.translate import Translate
 @pytest.fixture
 def square_image_grayscale():
     return np.array(
-        [[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]], dtype=np.float32
+        [[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]], dtype=np.uint8
     )
 
 
@@ -21,7 +21,7 @@ def square_image_rgb():
             [[1, 1, 1], [2, 2, 2], [3, 3, 3], [4, 4, 4]],
             [[1, 1, 1], [2, 2, 2], [3, 3, 3], [4, 4, 4]],
         ],
-        dtype=np.float32,
+        dtype=np.uint8,
     )
 
 
@@ -32,7 +32,7 @@ def test_translate_basic(square_image_grayscale, default_stream):
     result = op.run(square_image_grayscale).cpu().numpy()
 
     expected_result = np.array(
-        [[0, 1, 2, 3], [0, 1, 2, 3], [0, 1, 2, 3], [0, 1, 2, 3]], dtype=np.float32
+        [[0, 1, 2, 3], [0, 1, 2, 3], [0, 1, 2, 3], [0, 1, 2, 3]], dtype=np.uint8
     )
 
     assert np.array_equal(result, expected_result)
@@ -53,7 +53,7 @@ def test_translate_reflection(square_image_grayscale, default_stream):
             [2, 1, 1, 2],
             [2, 1, 1, 2],
         ],
-        dtype=np.float32,
+        dtype=np.uint8,
     )
 
     assert np.array_equal(result, expected_result)
@@ -72,7 +72,7 @@ def test_translate_rgb(square_image_rgb, default_stream):
             [[0, 0, 0], [1, 1, 1], [2, 2, 2], [3, 3, 3]],
             [[0, 0, 0], [1, 1, 1], [2, 2, 2], [3, 3, 3]],
         ],
-        dtype=np.float32,
+        dtype=np.uint8,
     )
 
     assert np.array_equal(result, expected_result)

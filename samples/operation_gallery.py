@@ -27,7 +27,7 @@ def draw_label(img, label):
 
 results = []
 
-results.append(draw_label(image.astype(np.float32), "Original"))
+results.append(draw_label(image, "Original"))
 
 
 affine_op = Affine(
@@ -88,7 +88,7 @@ histogram_equalization_op = HistogramEqualization(
 )
 results.append(
     draw_label(
-        histogram_equalization_op.run(image).cpu().numpy().astype(np.float32),
+        histogram_equalization_op.run(image).cpu().numpy(),
         "Histogram equalization",
     )
 )
@@ -100,7 +100,7 @@ for i in range(0, len(results), grid_width):
     max_idx = min(len(results), i + grid_width)
     imgs_to_concat = results[i:max_idx]
     while len(imgs_to_concat) < grid_width:
-        imgs_to_concat.append(np.zeros_like(results[0], dtype=np.float32))
+        imgs_to_concat.append(np.zeros_like(results[0]))
 
     rows.append(cv2.hconcat(imgs_to_concat))
 

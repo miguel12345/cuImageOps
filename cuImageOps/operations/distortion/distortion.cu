@@ -1,7 +1,7 @@
 #include "utils.cu"
 
 extern "C" __global__ 
-void distortion(float* output, float* image, float k1, float k2, float k3, float p1, float p2, unsigned int* dims, unsigned int fillMode, unsigned int interpolationMode)
+void distortion(unsigned char* output, unsigned char* image, float k1, float k2, float k3, float p1, float p2, unsigned int* dims, unsigned int fillMode, unsigned int interpolationMode)
 {
  size_t dstx = blockIdx.x * blockDim.x + threadIdx.x;
  size_t dsty = blockIdx.y * blockDim.y + threadIdx.y;
@@ -26,6 +26,6 @@ void distortion(float* output, float* image, float k1, float k2, float k3, float
   float srcx = (xcn_d + 0.5f) * width;
   float srcy = (ycn_d + 0.5f) * height;
 
-  sampleAndAssign(image,output,make_float2(srcx,srcy),outIdx,dims,fillMode,interpolationMode);
+  sampleAndAssign_uchar(image,output,make_float2(srcx,srcy),outIdx,dims,fillMode,interpolationMode);
   
 }

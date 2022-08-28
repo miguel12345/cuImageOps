@@ -15,7 +15,7 @@ def square_image_grayscale():
             [1, 1, 1, 1, 1],
             [1, 1, 1, 1, 1],
         ],
-        dtype=np.float32,
+        dtype=np.uint8,
     )
 
 
@@ -29,7 +29,7 @@ def square_image_grayscale_asymmetric():
             [1, 2, 3, 4, 5],
             [5, 4, 3, 2, 1],
         ],
-        dtype=np.float32,
+        dtype=np.uint8,
     )
 
 
@@ -52,7 +52,7 @@ def test_scale_down_center_pivot(square_image_grayscale, default_stream):
             [0, 1, 1, 1, 0],
             [0, 0, 0, 0, 0],
         ],
-        dtype=np.float32,
+        dtype=np.uint8,
     )
 
     assert np.array_equal(result, expected_result)
@@ -77,7 +77,7 @@ def test_scale_down_tl_pivot(square_image_grayscale, default_stream):
             [0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0],
         ],
-        dtype=np.float32,
+        dtype=np.uint8,
     )
 
     assert np.array_equal(result, expected_result)
@@ -102,7 +102,7 @@ def test_scale_down_br_pivot(square_image_grayscale, default_stream):
             [0, 0, 1, 1, 1],
             [0, 0, 1, 1, 1],
         ],
-        dtype=np.float32,
+        dtype=np.uint8,
     )
 
     assert np.array_equal(result, expected_result)
@@ -127,7 +127,7 @@ def test_scale_hflip(square_image_grayscale_asymmetric, default_stream):
             [5, 4, 3, 2, 1],
             [1, 2, 3, 4, 5],
         ],
-        dtype=np.float32,
+        dtype=np.uint8,
     )
 
     assert np.array_equal(result, expected_result)
@@ -152,7 +152,7 @@ def test_scale_vflip(square_image_grayscale_asymmetric, default_stream):
             [5, 4, 3, 2, 1],
             [1, 2, 3, 4, 5],
         ],
-        dtype=np.float32,
+        dtype=np.uint8,
     )
 
     assert np.array_equal(result, expected_result)

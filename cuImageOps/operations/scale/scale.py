@@ -44,15 +44,13 @@ class Scale(ImageOperation):
             DataContainer: Result of the operation. Can be transfered to cpu using cpu()
         """
 
-        image_input = image_input.astype(np.float32)
-
         input_shape = image_input.shape
 
         if len(image_input.shape) <= 2:
             input_shape = (*input_shape, 1)
 
         self.input = image_input
-        self.output = np.zeros_like(self.input, dtype=np.float32)
+        self.output = np.zeros_like(self.input)
         self.dims = np.array(input_shape, dtype=np.uint32)
 
         if self.module is None:

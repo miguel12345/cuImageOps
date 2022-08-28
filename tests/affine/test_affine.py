@@ -16,7 +16,7 @@ def square_image_grayscale():
             [0, 1, 1, 2, 0],
             [0, 0, 0, 0, 0],
         ],
-        dtype=np.float32,
+        dtype=np.uint8,
     )
 
 
@@ -40,7 +40,7 @@ def test_rotate_and_translate(square_image_grayscale, default_stream):
             [0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0],
         ],
-        dtype=np.float32,
+        dtype=np.uint8,
     )
 
     assert np.allclose(result, expected_result)

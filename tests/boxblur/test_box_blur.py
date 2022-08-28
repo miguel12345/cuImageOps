@@ -14,7 +14,7 @@ def square_image_grayscale():
             [2, 4, 2, 4, 2],
             [2, 2, 2, 2, 2],
         ],
-        dtype=np.float32,
+        dtype=np.uint8,
     )
 
 
@@ -28,18 +28,20 @@ def test_boxblur_kernel_size_3(square_image_grayscale, default_stream):
     )
     result = op.run(square_image_grayscale).cpu().numpy()
 
-    expected_result = np.array(
-        [
-            [1.1111112, 1.5555556, 1.7777778, 1.5555556, 1.1111112],
-            [1.5555556, 2.2222223, 2.4444447, 2.2222223, 1.5555556],
-            [1.7777778, 2.4444447, 2.888889, 2.4444447, 1.7777778],
-            [1.5555556, 2.2222223, 2.4444447, 2.2222223, 1.5555556],
-            [1.1111112, 1.5555556, 1.7777778, 1.5555556, 1.1111112],
-        ],
-        dtype=np.float32,
+    expected_result = np.rint(
+        np.array(
+            [
+                [1.1111112, 1.5555556, 1.7777778, 1.5555556, 1.1111112],
+                [1.5555556, 2.2222223, 2.4444447, 2.2222223, 1.5555556],
+                [1.7777778, 2.4444447, 2.888889, 2.4444447, 1.7777778],
+                [1.5555556, 2.2222223, 2.4444447, 2.2222223, 1.5555556],
+                [1.1111112, 1.5555556, 1.7777778, 1.5555556, 1.1111112],
+            ],
+            dtype=np.float32,
+        )
     )
 
-    assert np.allclose(result, expected_result)
+    assert np.array_equal(result, expected_result)
 
 
 def test_boxblur_invalid_kernel_size_even(square_image_grayscale, default_stream):

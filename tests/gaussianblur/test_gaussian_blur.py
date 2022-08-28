@@ -17,7 +17,7 @@ def square_image_grayscale():
             [5, 4, 3, 2, 1],
             [1, 2, 3, 4, 5],
         ],
-        dtype=np.float32,
+        dtype=np.uint8,
     )
 
 
@@ -32,11 +32,11 @@ def test_gaussianblur_value_ranges(square_image_grayscale, default_stream):
     result = op.run(square_image_grayscale).cpu().numpy()
 
     # Confirm that the result differs from the input
-    assert np.array_equal(result, square_image_grayscale) == False
+    assert np.array_equal(result, square_image_grayscale) is False
 
     # Confirm that the values remain within acceptable ranges
-    assert result.max() < square_image_grayscale.max()
-    assert result.min() > square_image_grayscale.min()
+    assert result.max() <= square_image_grayscale.max()
+    assert result.min() >= square_image_grayscale.min()
 
 
 def test_gaussianblur_kernel_size_1(square_image_grayscale, default_stream):
@@ -48,7 +48,7 @@ def test_gaussianblur_kernel_size_1(square_image_grayscale, default_stream):
 
     result = op.run(square_image_grayscale).cpu().numpy()
 
-    assert np.allclose(result, square_image_grayscale)
+    assert np.array_equal(result, square_image_grayscale)
 
 
 def test_gaussianblur_invalid_kernel_size_even(square_image_grayscale, default_stream):
@@ -100,4 +100,4 @@ def test_gaussianblur_separable_same_results(square_image_grayscale, default_str
     nonSeparableResult = nonSeparableOp.run(square_image_grayscale).cpu().numpy()
     separableOp = separableOp.run(square_image_grayscale).cpu().numpy()
 
-    assert np.allclose(nonSeparableResult, separableOp)
+    assert np.array_equal(nonSeparableResult, separableOp)
