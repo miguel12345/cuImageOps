@@ -37,7 +37,7 @@ class Histogram(ImageOperation):
             "histogram.cu",
         )
 
-    def run(self, image_input: np.array, debug=False) -> DataContainer:
+    def run(self, image_input: np.array, debug: bool = False) -> DataContainer:
         """Runs the operation on an image and returns the data container for the result
 
         Args:

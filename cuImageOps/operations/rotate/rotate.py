@@ -34,7 +34,7 @@ class Rotate(ImageOperation):
     def __get_kernel_name(self) -> str:
         return "rotate"
 
-    def run(self, image_input: np.array) -> DataContainer:
+    def run(self, image_input: np.array, debug: bool = False) -> DataContainer:
         """Runs the operation on an image and returns the data container for the result
 
         Args:
@@ -55,7 +55,7 @@ class Rotate(ImageOperation):
 
         if self.module is None:
             self.module = cuda_utils.compile_module(
-                self.__get_module_path(), debug=True
+                self.__get_module_path(), debug=debug
             )
             self.kernel = cuda_utils.get_kernel(self.module, self.__get_kernel_name())
 

@@ -89,7 +89,7 @@ class GaussianBlur(ImageOperation):
         gaussian_kernel_1d /= gaussian_kernel_1d.sum()
         return gaussian_kernel_1d
 
-    def run(self, image_input: np.array) -> DataContainer:
+    def run(self, image_input: np.array, debug: bool = False) -> DataContainer:
         """Runs the operation on an image and returns the data container for the result
 
         Args:
@@ -113,7 +113,7 @@ class GaussianBlur(ImageOperation):
 
         if self.module is None:
             self.module = cuda_utils.compile_module(
-                self.__get_module_path(), debug=True
+                self.__get_module_path(), debug=debug
             )
             self.kernel = cuda_utils.get_kernel(self.module, "blur")
             self.kernel_separable_horizontal = cuda_utils.get_kernel(
