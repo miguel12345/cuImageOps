@@ -25,7 +25,7 @@ def create_np_array_uninitialized(shape, dtype):
     return empty_arr
 
 
-def create_np_array_uninitialized_like(other: np.array):
-    empty_arr: np.array = np.empty_like(other).view(ArrayWithExtra)
+def create_np_array_uninitialized_like(other: np.array, dtype=None):
+    empty_arr: np.array = np.empty_like(other, dtype=dtype).view(ArrayWithExtra)
     empty_arr.uninitialized = True
     return empty_arr

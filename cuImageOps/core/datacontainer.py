@@ -25,7 +25,7 @@ class DataContainer:
 
         # If the host buffer is uninitalized (i.e. output buffers), dont waste time copying data to the device
         skip_copy = False
-        if is_np_array_uninitialized(self.device_buffer):
+        if is_np_array_uninitialized(self.host_buffer):
             skip_copy = True
 
         if not skip_copy:

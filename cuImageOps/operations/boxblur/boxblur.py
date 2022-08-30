@@ -4,6 +4,7 @@ import cuImageOps
 from cuImageOps.core.datacontainer import DataContainer
 from cuImageOps.core.imageoperation import FillMode, ImageOperation, InterpolationMode
 import cuImageOps.utils.cuda as cuda_utils
+from cuImageOps.utils.utils import create_np_array_uninitialized_like
 
 
 class BoxBlur(ImageOperation):
@@ -92,8 +93,8 @@ class BoxBlur(ImageOperation):
             input_shape = (*input_shape, 1)
 
         self.input = image_input
-        self.output = np.zeros_like(self.input)
-        self.intermediate_output = np.zeros_like(
+        self.output = self.output = create_np_array_uninitialized_like(image_input)
+        self.intermediate_output = create_np_array_uninitialized_like(
             self.input, dtype=np.float32
         )  # For separable filter
         self.dims = np.array(input_shape, dtype=np.uint32)

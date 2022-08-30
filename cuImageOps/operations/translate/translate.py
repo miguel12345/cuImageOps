@@ -6,6 +6,7 @@ from cuImageOps.core.datacontainer import DataContainer
 from cuImageOps.core.imageoperation import FillMode, ImageOperation, InterpolationMode
 
 import cuImageOps.utils.cuda as cuda_utils
+from cuImageOps.utils.utils import create_np_array_uninitialized_like
 
 
 class Translate(ImageOperation):
@@ -57,7 +58,7 @@ class Translate(ImageOperation):
             input_shape = (*input_shape, 1)
 
         self.input = image_input
-        self.output = np.zeros_like(self.input)
+        self.output = create_np_array_uninitialized_like(self.input)
         self.dims = np.array(input_shape, dtype=np.uint32)
 
         if self.module is None:

@@ -7,7 +7,7 @@ from cuImageOps.core.datacontainer import DataContainer
 from cuImageOps.core.imageoperation import FillMode, ImageOperation, InterpolationMode
 from cuImageOps.operations.histogram.histogram import Histogram
 import cuImageOps.utils.cuda as cuda_utils
-from cuImageOps.utils.utils import gaussian
+from cuImageOps.utils.utils import create_np_array_uninitialized_like, gaussian
 
 
 class HistogramEqualization(ImageOperation):
@@ -51,7 +51,7 @@ class HistogramEqualization(ImageOperation):
                 self.module, "histogram_equalization"
             )
 
-        output = np.zeros_like(image_input, dtype=np.uint8)
+        output = create_np_array_uninitialized_like(image_input, dtype=np.uint8)
         cumulative_distribution_min = 0
 
         (
