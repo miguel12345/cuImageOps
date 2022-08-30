@@ -11,17 +11,6 @@
             "program": "samples/operation_gallery.py",
             "console": "integratedTerminal",
             "justMyCode": true
-        },
-        {
-            "name": "CUDA C++: Launch",
-            "type": "cuda-gdb",
-            "request": "launch",
-            "program": "python operation_test.py"
-        },
-        {
-            "name": "CUDA C++: Attach",
-            "type": "cuda-gdb",
-            "request": "attach"
         }
     ]
 }

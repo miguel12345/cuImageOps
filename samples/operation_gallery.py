@@ -106,6 +106,6 @@ for i in range(0, len(results), grid_width):
 
 final_result = cv2.vconcat(rows)
 
-cv2.imwrite("images/operation_gallery.png", final_result)
+cv2.imwrite("samples/output/operation_gallery.png", final_result)
 cv2.imshow("Result", final_result.astype(np.uint8))
 cv2.waitKey()

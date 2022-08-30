@@ -3,7 +3,7 @@
 
 cuImageOps is a library for performing image operations on the GPU using CUDA
 
-![](images/operation_gallery.png)
+![](samples/output/operation_gallery.png)
 
 As simple as
 
