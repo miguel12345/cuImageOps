@@ -2,47 +2,60 @@ from typing import Any, Tuple
 from cuda import cuda
 import numpy as np
 
+from cuImageOps.utils.utils import is_np_array_uninitialized
+
 
 class DataContainer:
     def __init__(self, hostBuffer: np.array, stream: any) -> None:
-        self.deviceBuffer = None
-        self.hostBuffer = hostBuffer
-        self.shape = self.hostBuffer.shape
+        self.device_buffer = None
+        self.host_buffer = hostBuffer
+        self.shape = self.host_buffer.shape
         self.stream = stream
-        self.dtype = self.hostBuffer.dtype
-        self.deviceBufferPointer = None
+        self.dtype = self.host_buffer.dtype
+        self.device_buffer_pointer = None
 
     def gpu(self):
         from cuImageOps.utils.cuda import check_error
 
-        assert self.hostBuffer is not None
+        assert self.host_buffer is not None
 
-        buffer_size = self.hostBuffer.size * self.hostBuffer.itemsize
-        err, self.deviceBuffer = cuda.cuMemAlloc(buffer_size)
+        buffer_size = self.host_buffer.size * self.host_buffer.itemsize
+        err, self.device_buffer = cuda.cuMemAlloc(buffer_size)
         check_error(err)
 
-        (err,) = cuda.cuMemcpyHtoDAsync(
-            self.deviceBuffer, self.hostBuffer.ctypes.data, buffer_size, self.stream
+        # If the host buffer is uninitalized (i.e. output buffers), dont waste time copying data to the device
+        skip_copy = False
+        if is_np_array_uninitialized(self.device_buffer):
+            skip_copy = True
+
+        if not skip_copy:
+            (err,) = cuda.cuMemcpyHtoDAsync(
+                self.device_buffer,
+                self.host_buffer.ctypes.data,
+                buffer_size,
+                self.stream,
+            )
+
+            check_error(err)
+
+        self.device_buffer_pointer = np.array(
+            [int(self.device_buffer)], dtype=np.uint64
         )
 
-        check_error(err)
-
-        self.deviceBufferPointer = np.array([int(self.deviceBuffer)], dtype=np.uint64)
-
     def memAddr(self) -> int:
-        if self.deviceBuffer is None:
-            return self.hostBuffer.ctypes.data
+        if self.device_buffer is None:
+            return self.host_buffer.ctypes.data
         else:
-            return self.deviceBufferPointer.ctypes.data
+            return self.device_buffer_pointer.ctypes.data
 
     def cpu(self):
         from cuImageOps.utils.cuda import check_error
 
         # Copy data from device to host
         (err,) = cuda.cuMemcpyDtoHAsync(
-            self.hostBuffer.ctypes.data,
-            self.deviceBuffer,
-            self.hostBuffer.size * self.hostBuffer.itemsize,
+            self.host_buffer.ctypes.data,
+            self.device_buffer,
+            self.host_buffer.size * self.host_buffer.itemsize,
             self.stream,
         )
         check_error(err)
@@ -54,11 +67,11 @@ class DataContainer:
         return self
 
     def numpy(self) -> np.array:
-        return self.hostBuffer
+        return self.host_buffer
 
     def __del__(self):
         from cuImageOps.utils.cuda import check_error
 
-        if self.deviceBuffer is not None:
-            (err,) = cuda.cuMemFree(self.deviceBuffer)
+        if self.device_buffer is not None:
+            (err,) = cuda.cuMemFree(self.device_buffer)
             check_error(err)

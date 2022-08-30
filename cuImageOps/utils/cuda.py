@@ -29,9 +29,7 @@ def compile_module(module_path, debug=True):
     )
 
     check_error(err)
-    cuda_include_path = os.path.join(
-        os.path.dirname(cuImageOps.__file__), "core", "cuda"
-    )
+    cuda_include_path = os.path.join(os.path.dirname(cuImageOps.__file__), "utils")
     opts = [
         b"--gpu-architecture=compute_61",
         str.encode(f"--include-path={cuda_include_path}"),
@@ -110,6 +108,26 @@ def get_kernel_launch_dims(input_image: np.array, threads_per_block: int = 16):
 
 
 def copy_data_to_device(
+    data: List[np.array], stream: cuda.CUstream
+) -> List[DataContainer]:
+
+    data_containers = []
+
+    # Allocate buffers and copy data
+    for host_buffer in data:
+
+        data_container = DataContainer(host_buffer, stream)
+
+        # Keep it on CPU if scalar
+        if len(host_buffer.shape) > 0:
+            data_container.gpu()
+
+        data_containers.append(data_container)
+
+    return data_containers
+
+
+def allocate_data_to_device(
     data: List[np.array], stream: cuda.CUstream
 ) -> List[DataContainer]:
 

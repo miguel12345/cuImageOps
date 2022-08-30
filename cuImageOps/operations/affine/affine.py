@@ -6,6 +6,7 @@ from cuImageOps.core.imageoperation import FillMode, ImageOperation, Interpolati
 import cuImageOps
 import cuImageOps.utils.cuda as cuda_utils
 import cuImageOps.utils.geometric as geometric_utils
+from cuImageOps.utils.utils import create_np_array_uninitialized_like
 
 
 class Affine(ImageOperation):
@@ -86,7 +87,7 @@ class Affine(ImageOperation):
             input_shape = (*input_shape, 1)
 
         self.input = image_input
-        self.output = np.zeros_like(self.input)
+        self.output = create_np_array_uninitialized_like(image_input)
         self.dims = np.array(input_shape, dtype=np.uint32)
 
         if self.module is None:
