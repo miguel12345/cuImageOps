@@ -1,6 +1,6 @@
 from cuda import cuda
 
-from cuImageOps.utils.cuda import check_error
+from cuImageOps.utils.utils import check_error
 
 
 class CudaContext:
@@ -21,6 +21,8 @@ class CudaContext:
         check_error(err)
 
     def __del__(self):
+
+        print("Destroying context")
         if self.context is not None:
             (err,) = cuda.cuCtxDestroy(self.context)
             check_error(err)

@@ -4,19 +4,9 @@ import math
 from cuda import cuda, nvrtc
 import numpy as np
 import cuImageOps
+from cuImageOps.core.cuda.stream import CudaStream
 from cuImageOps.core.datacontainer import DataContainer
-
-
-def check_error(err):
-    if isinstance(err, cuda.CUresult):
-        if err != cuda.CUresult.CUDA_SUCCESS:
-            message = cuda.cuGetErrorString(err)
-            raise RuntimeError(f"Cuda Error: {message}")
-    elif isinstance(err, nvrtc.nvrtcResult):
-        if err != nvrtc.nvrtcResult.NVRTC_SUCCESS:
-            raise RuntimeError(f"Nvrtc Error: {message}")
-    else:
-        raise RuntimeError(f"Unknown error type: {err}")
+from cuImageOps.utils.utils import check_error
 
 
 def compile_module(module_path, debug=True):
@@ -76,7 +66,7 @@ def run_kernel(
     blocks: Tuple,
     threads: Tuple,
     data_containers: List[DataContainer],
-    stream: cuda.CUstream,
+    stream: CudaStream,
 ):
 
     args = np.array([arg.memAddr() for arg in data_containers], dtype=np.uint64)
@@ -86,7 +76,7 @@ def run_kernel(
         *blocks,
         *threads,
         0,
-        stream,  # stream
+        stream.native_ptr(),  # stream
         args.ctypes.data,  # kernel arguments
         0,  # extra (ignore)
     )

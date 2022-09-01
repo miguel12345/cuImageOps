@@ -15,17 +15,20 @@ class Operation(ABC):
         self.data_containers: List[DataContainer] = []
         self.module = None
         self.kernel = None
+        self.stream: CudaStream = None
 
         if stream is None:
 
             if Operation._defaultStream is None:
                 Operation._defaultStream = CudaStream()
 
-            self.stream = Operation._defaultStream.stream
+            self.stream = Operation._defaultStream
         else:
-            self.stream = stream.stream
+            self.stream = stream
 
     def __del__(self):
-        if self.module is not None:
+        print("Destroying operation")
+        print(f"self.stream {self.stream}")
+        if self.stream is not None and self.module is not None:
             (err,) = cuda.cuModuleUnload(self.module)
             cuda_utils.check_error(err)

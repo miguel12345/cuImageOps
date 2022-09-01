@@ -1,8 +1,9 @@
 from typing import Any, Tuple
 from cuda import cuda
 import numpy as np
+from cuImageOps.core.cuda.stream import CudaStream
 
-from cuImageOps.utils.utils import is_np_array_uninitialized
+from cuImageOps.utils.utils import check_error, is_np_array_uninitialized
 
 
 class DataContainer:
@@ -10,12 +11,11 @@ class DataContainer:
         self.device_buffer = None
         self.host_buffer = hostBuffer
         self.shape = self.host_buffer.shape
-        self.stream = stream
+        self.stream: CudaStream = stream
         self.dtype = self.host_buffer.dtype
         self.device_buffer_pointer = None
 
     def gpu(self):
-        from cuImageOps.utils.cuda import check_error
 
         assert self.host_buffer is not None
 
@@ -33,7 +33,7 @@ class DataContainer:
                 self.device_buffer,
                 self.host_buffer.ctypes.data,
                 buffer_size,
-                self.stream,
+                self.stream.native_ptr(),
             )
 
             check_error(err)
@@ -49,19 +49,18 @@ class DataContainer:
             return self.device_buffer_pointer.ctypes.data
 
     def cpu(self):
-        from cuImageOps.utils.cuda import check_error
 
         # Copy data from device to host
         (err,) = cuda.cuMemcpyDtoHAsync(
             self.host_buffer.ctypes.data,
             self.device_buffer,
             self.host_buffer.size * self.host_buffer.itemsize,
-            self.stream,
+            self.stream.native_ptr(),
         )
         check_error(err)
 
         # Syncronize stream
-        (err,) = cuda.cuStreamSynchronize(self.stream)
+        (err,) = cuda.cuStreamSynchronize(self.stream.native_ptr())
         check_error(err)
 
         return self
@@ -70,8 +69,8 @@ class DataContainer:
         return self.host_buffer
 
     def __del__(self):
-        from cuImageOps.utils.cuda import check_error
 
-        if self.device_buffer is not None:
+        print("Destroying datacontainer")
+        if self.stream is not None and self.device_buffer is not None:
             (err,) = cuda.cuMemFree(self.device_buffer)
             check_error(err)

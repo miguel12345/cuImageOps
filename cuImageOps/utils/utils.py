@@ -1,5 +1,6 @@
 import math
 import numpy as np
+from cuda import cuda, nvrtc
 
 
 def gaussian(x: float, sigma: float):
@@ -29,3 +30,15 @@ def create_np_array_uninitialized_like(other: np.array, dtype=None):
     empty_arr: np.array = np.empty_like(other, dtype=dtype).view(ArrayWithExtra)
     empty_arr.uninitialized = True
     return empty_arr
+
+
+def check_error(err):
+    if isinstance(err, cuda.CUresult):
+        if err != cuda.CUresult.CUDA_SUCCESS:
+            message = cuda.cuGetErrorString(err)
+            raise RuntimeError(f"Cuda Error: {message}")
+    elif isinstance(err, nvrtc.nvrtcResult):
+        if err != nvrtc.nvrtcResult.NVRTC_SUCCESS:
+            raise RuntimeError(f"Nvrtc Error: {message}")
+    else:
+        raise RuntimeError(f"Unknown error type: {err}")
