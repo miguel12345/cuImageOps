@@ -4,8 +4,6 @@ from cuImageOps.utils.utils import check_error
 
 
 class CudaStream:
-    _defaultContext = None
-
     def __init__(self, context: CudaContext = None) -> None:
         super().__init__()
         self.module = None
@@ -13,11 +11,7 @@ class CudaStream:
         self.stream = None
 
         if self.context is None:
-
-            if CudaStream._defaultContext is None:
-                CudaStream._defaultContext = CudaContext()
-
-            self.context = CudaStream._defaultContext
+            self.context = CudaContext.default_context()
 
         err, self.stream = cuda.cuStreamCreate(0)
         check_error(err)
@@ -27,7 +21,6 @@ class CudaStream:
 
     def __del__(self):
 
-        print("Destroying stream")
         if self.stream is not None:
             (err,) = cuda.cuStreamDestroy(self.stream)
             check_error(err)

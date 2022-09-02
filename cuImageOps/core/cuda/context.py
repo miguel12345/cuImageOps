@@ -4,6 +4,23 @@ from cuImageOps.utils.utils import check_error
 
 
 class CudaContext:
+
+    __defaultContext = None
+
+    @staticmethod
+    def default_context():
+
+        if CudaContext.__defaultContext is None:
+            CudaContext.__defaultContext = CudaContext()
+
+        return CudaContext.__defaultContext
+
+    @staticmethod
+    def destroy_default_context():
+
+        if CudaContext.__defaultContext is None:
+            del CudaContext.__defaultContext
+
     def __init__(self, deviceIdx: int = 0) -> None:
 
         self.context = None
@@ -22,7 +39,6 @@ class CudaContext:
 
     def __del__(self):
 
-        print("Destroying context")
         if self.context is not None:
             (err,) = cuda.cuCtxDestroy(self.context)
             check_error(err)

@@ -4,4 +4,4 @@ opencv-python==4.6.0.66
 pytest==7.1.2
 black
 pylint>=2
-matplotlib
+matplotlib==3.5.3

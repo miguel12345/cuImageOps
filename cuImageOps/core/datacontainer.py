@@ -70,7 +70,6 @@ class DataContainer:
 
     def __del__(self):
 
-        print("Destroying datacontainer")
         if self.stream is not None and self.device_buffer is not None:
             (err,) = cuda.cuMemFree(self.device_buffer)
             check_error(err)

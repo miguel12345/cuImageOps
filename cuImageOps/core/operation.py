@@ -27,8 +27,7 @@ class Operation(ABC):
             self.stream = stream
 
     def __del__(self):
-        print("Destroying operation")
-        print(f"self.stream {self.stream}")
+
         if self.stream is not None and self.module is not None:
             (err,) = cuda.cuModuleUnload(self.module)
             cuda_utils.check_error(err)

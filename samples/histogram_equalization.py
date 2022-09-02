@@ -36,8 +36,6 @@ histogram_equalization_op = HistogramEqualization(
 equalized_img = histogram_equalization_op.run(image).cpu().numpy()
 after_histogram = histogram_op.run(equalized_img).cpu().numpy()
 
-raise Exception()
-
 # Display
 
 after_histogram_plot_img = render_histogram(after_histogram)
